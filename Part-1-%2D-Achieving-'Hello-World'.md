@@ -356,7 +356,8 @@ Since node doesn't natively understand TypeScript, we have included this as a pa
 
 # Running the demo
 
-We can now run the following commands to compile our code and run the server
+We can now run the 2 following commands to compile our code and run the server
+
 `npm run build`
 ```
 > npm run build
