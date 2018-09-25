@@ -75,3 +75,78 @@ _tsconfig.json_
 For the webpack.config.js file, we will need to decide something about our project structure.  Here is the folder structure that I will be using for this tutorial
 
 ![image.png](/.attachments/image-df1364c9-dfaa-4fae-9cf4-58315d0cf16c.png)
+
+With that structure in mind, here is the starting webpack config:
+
+_webpack.config.js_
+
+```js
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
+
+var config = [
+    //web configuration
+    {
+        entry: ['./src/web/boot-client.tsx'],
+        output: {
+            path: path.resolve(__dirname, './public'),
+            filename: 'build/bundle.js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test:/\.css$/,
+                    use:['style-loader','css-loader'],
+                },
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/web/"),
+                    loader: "awesome-typescript-loader"
+                },
+                {
+                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf)$/,
+                    loader: 'url-loader?limit=25000'
+                },
+            ]
+        },
+        devtool: "source-map"
+    },
+
+    //server configuration
+    {
+        entry: ['./src/server/main.ts'],
+        target: 'node',
+        externals: [nodeExternals()],
+        output: {
+            path: path.resolve(__dirname, './build'),
+            filename: '[name].js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/server/"),
+                    loader: "awesome-typescript-loader"
+                }
+            ]
+        },
+
+        //by default, webpack will set these to '/', so override that behavior on the server
+        node: {
+            __dirname: false,
+            __filename: false
+        }
+    }
+];
+module.exports = config;
+```
+
+We have separate configurations for the server and the client, since we need to compile both from typescript to javascript.  We could set up the project to avoid using webpack to transpile the server code, but I opted to go down this route.
