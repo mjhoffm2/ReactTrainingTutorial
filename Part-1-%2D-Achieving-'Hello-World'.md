@@ -141,6 +141,26 @@ The important things that the webpack configuration is doing is:
 
 More information about configuring webpack can be found from the official documentation: https://webpack.js.org/configuration/
 
+## The main.html
+
+We will also need an html file, which we will name `main.html` and place in the `public` folder:
+
+_main.html_
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo</title>
+</head>
+<body>
+<div id="root"></div>
+<script src="./build/bundle.js"></script>
+</body>
+</html>
+```
+
+This simply creates a single html element for react to mount to, and includes the bundle created by webpack as a script.
+
 # Create the React App
 
 Our front end will be implemented using React, but for this part of the tutorial we will only go as far as printing out "Hello World" to the dom.
@@ -182,31 +202,11 @@ These files will be located in the project as follows:
 
 Based on the client (web) part of our webpack.config.json file, boot-client.tsx is our entry point, and our code will be output as a single bundle.js file in the `public/build` folder.
 
-We can now build our front end code by running
-
-## The main.html
-
-We will also need an html file, which we will name `main.html` and place in the `public` folder:
-
-_main.html_
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Demo</title>
-</head>
-<body>
-<div id="root"></div>
-<script src="./build/bundle.js"></script>
-</body>
-</html>
-```
-
-This simply creates a single html element for react to mount to, and includes the bundle as a script.
+We can now build our front end code by running `npm run build` in the console.  After that, you should be able to open the main.html file in a web browser and see the app in action.
 
 # Setting up the server
 
-Since we are already using TypeScript for the front end, we will be using it for the server as well.  We will need to update our configuration
+Just opening up the application as a static file in a web browser isn't going to cut it going forward, so let's set up a server to actually serve the bundle.  Since we are already using TypeScript for the front end, we will be using it for the server as well.  We will need to update our configuration to support this.
 
 ## Update the webpack.config.js
 
@@ -285,3 +285,88 @@ module.exports = config;
 We have separate configurations for the server and the client, since we need to compile both from TypeScript to JavaScript.  We could set up the project to avoid using webpack to pre-process the server code, but I opted to go down this route.
 
 We could also use separate tsconfig.json files for both the server and the client.  I have tried this before and it works well, but I have also found that IDE's tend to not pick up the correct one.  Therefore, we will just be using the one generic tsconfig file.
+
+## Server Code
+
+We will configure our server to run from port 3000 on our localhost, and will server the static main.html file when a user requests the "/" url.  The following code will accomplish this:
+
+_App.ts_
+```ts
+import * as express from "express";
+import * as path from "path";
+
+export class App {
+    // ref to Express instance
+    public express: express.Application;
+    //Run configuration methods on the Express instance.
+    constructor() {
+        this.express = express();
+        this.configureMiddleWare();
+        this.configureApi();
+
+        //static files
+        this.express.use(express.static(path.join(__dirname, '/../public')));
+
+        //temporary static home page
+        this.express.get("/", (req, res, next) => {
+            let filePath: string = path.resolve(__dirname, '../public/main.html');
+            res.sendFile(filePath);
+        });
+    }
+
+    // Configure Express middleware.
+    private configureMiddleWare(): void {
+
+    }
+
+    // Configure API endpoints.
+    private configureApi(): void {
+
+    }
+}
+```
+
+_main.ts_
+```ts
+import * as http from 'http';
+import {App} from "./App";
+
+console.log("this is the server");
+
+console.log(`server env: ${process.env.NODE_ENV}`);
+
+const app = new App().express;
+const port =  3000;
+app.set('port', 3000);
+//create a server and pass our Express app to it.
+const server = http.createServer(app);
+server.listen(port);
+server.on('listening', onListening);
+
+//function to note that Express is listening
+function onListening(): void {
+    console.log(`Listening on port ${port}`);
+}
+```
+![image.png](/.attachments/image-69ec849e-dd38-4aac-9b7e-ee1bbf79105a.png)
+
+Since node doesn't natively understand TypeScript, we have included this as a part of our webpack build process.  Webpack will convert the TypeScript code into JavaScript that node can understand and run.  Now, when you run `npm run build` in the console, you should find that in addition to the client being compiled into a `bundle.js` file, the server code will be built into the build folder as `main.js`.
+
+We can now run the following commands to compile our code and run the server
+`npm run build`
+`node ./build/main.js`
+
+Once the server is running, you can navigate to `localhost:3000` in a web browser to check that it is working.  I also recommend adding an npm script to the package.json file to host the server:
+
+```json
+  ...
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/.bin/webpack --mode=development",
+    "build:prod": "node_modules/.bin/webpack --mode=production",
+    "host": "node ./build/main.js"
+  },
+  ...
+```
+
+This lets us run `npm run host` instead of `node ./build/main.js`.
