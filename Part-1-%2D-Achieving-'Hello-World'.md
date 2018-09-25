@@ -26,6 +26,8 @@ _package.json_
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/.bin/webpack --mode=development",
+    "build:prod": "node_modules/.bin/webpack --mode=production",
   },
   "keywords": [],
   "author": "",
@@ -126,42 +128,18 @@ var config = [
             ]
         },
         devtool: "source-map"
-    },
-
-    //server configuration
-    {
-        entry: ['./src/server/main.ts'],
-        target: 'node',
-        externals: [nodeExternals()],
-        output: {
-            path: path.resolve(__dirname, './build'),
-            filename: '[name].js',
-        },
-        resolve: {
-            //automatically infer '.ts' and '.tsx' when importing files
-            extensions: ['.js', '.jsx', '.ts', '.tsx']
-        },
-        module: {
-            rules: [
-                {
-                    test:/\.tsx?$/,
-                    include: path.resolve(__dirname, "./src/server/"),
-                    loader: "awesome-typescript-loader"
-                }
-            ]
-        },
-
-        //by default, webpack will set these to '/', so override that behavior on the server
-        node: {
-            __dirname: false,
-            __filename: false
-        }
     }
 ];
 module.exports = config;
 ```
 
-We have separate configurations for the server and the client, since we need to compile both from typescript to javascript.  We could set up the project to avoid using webpack to pre-process the server code, but I opted to go down this route.
+The important things that the webpack configuration is doing is:
+1. Define the entry point.
+2. Define the loaders that will be used for different files.
+3. Configure how the final JavaScript bundle will be put together.
+3. Define the output location and name.
+
+More information about configuring webpack can be found from the official documentation: https://webpack.js.org/configuration/
 
 # Create the React App
 
@@ -197,3 +175,113 @@ console.log(message);
 
 ReactDOM.render(<AppRoot/>, document.getElementById('root'));
 ```
+
+These files will be located in the project as follows:
+
+![image.png](/.attachments/image-27a3ede8-8e66-486a-b6ec-8b400c88a4f2.png)
+
+Based on the client (web) part of our webpack.config.json file, boot-client.tsx is our entry point, and our code will be output as a single bundle.js file in the `public/build` folder.
+
+We can now build our front end code by running
+
+## The main.html
+
+We will also need an html file, which we will name `main.html` and place in the `public` folder:
+
+_main.html_
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo</title>
+</head>
+<body>
+<div id="root"></div>
+<script src="./build/bundle.js"></script>
+</body>
+</html>
+```
+
+This simply creates a single html element for react to mount to, and includes the bundle as a script.
+
+# Setting up the server
+
+Since we are already using TypeScript for the front end, we will be using it for the server as well.  We will need to update our configuration
+
+## Update the webpack.config.js
+
+We will update the existing webpack.config.js we already have to include a new server configuration.
+
+_webpack.config.js_
+```js
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
+
+var config = [
+    //web configuration
+    {
+        entry: ['./src/web/boot-client.tsx'],
+        output: {
+            path: path.resolve(__dirname, './public'),
+            filename: 'build/bundle.js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test:/\.css$/,
+                    use:['style-loader','css-loader'],
+                },
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/web/"),
+                    loader: "awesome-typescript-loader"
+                },
+                {
+                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf)$/,
+                    loader: 'url-loader?limit=25000'
+                },
+            ]
+        },
+        devtool: "source-map"
+    },
+
+    //server configuration
+    {
+        entry: ['./src/server/main.ts'],
+        target: 'node',
+        externals: [nodeExternals()],
+        output: {
+            path: path.resolve(__dirname, './build'),
+            filename: '[name].js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/server/"),
+                    loader: "awesome-typescript-loader"
+                }
+            ]
+        },
+
+        //by default, webpack will set these to '/', so override that behavior on the server
+        node: {
+            __dirname: false,
+            __filename: false
+        }
+    }
+];
+module.exports = config;
+```
+
+We have separate configurations for the server and the client, since we need to compile both from TypeScript to JavaScript.  We could set up the project to avoid using webpack to pre-process the server code, but I opted to go down this route.
+
+We could also use separate tsconfig.json files for both the server and the client.  I have tried this before and it works well, but I have also found that IDE's tend to not pick up the correct one.  Therefore, we will just be using the one generic tsconfig file.
