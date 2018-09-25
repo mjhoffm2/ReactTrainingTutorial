@@ -10,7 +10,13 @@ You should also use an IDE with TypeScript support.  Visual Studio, Eclipse, and
 
 # Initialize the project
 
-Initialize the project with a package.json file in the root directory.  This can be done by using the command `npm init -y` to create a default package.json file and then installing individual dependencies.  To save time, I will provide a starting package.json that contains the dependencies we need for now.
+## The package.json
+
+Initialize the project with a package.json file in the root directory.  This can be done by using the command `npm init -y` to create a default package.json file and then installing individual dependencies.
+
+A package.json is used by npm to describe the project and manage dependencies.  We will also be using the package.json file to run our build/deploy scripts.  For more information about it, you can refer to the official npm documentation: https://docs.npmjs.com/getting-started/using-a-package.json
+
+To save time, I will provide a starting package.json that contains the dependencies we need for now.
 
 _package.json_
 ```json
@@ -52,7 +58,9 @@ _package.json_
 
 With a console open to the same folder that the package.json is located in, run `npm install` to download all the required dependencies.
 
-Next, we need to set up a tsconfig.json and webpack.config.js file.  Again, I will provide starting versions to save time.
+## The tsconfig.json
+
+Next, we need to set up a tsconfig.json file.  This will be used by the TypeScript compiler to convert the TypeScript we write into JavaScript.  Most IDEs will also use this for syntax highlighting and improved code completion.  Again, I will provide a minimal starting version to save time:
 
 _tsconfig.json_
 ```json
@@ -72,7 +80,11 @@ _tsconfig.json_
 }
 ```
 
-For the webpack.config.js file, we will need to decide something about our project structure.  Here is the folder structure that I will be using for this tutorial
+We will be invoking the TypeScript compiler as a part of our webpack build process, so we don't need to use it to transpile down to browser-compatible code yet.
+
+## The webpack.config.js
+
+The last initialization related file we will need is the webpack.config.js file.  This is used to configure our webpack build process.  This involves things like setting up the entry point, output files, and the loaders used to process each type of file.  Before we can create it, we will need to decide something about our project structure.  Here is the folder structure that I will be using for this tutorial:
 
 ![image.png](/.attachments/image-df1364c9-dfaa-4fae-9cf4-58315d0cf16c.png)
 
@@ -149,4 +161,39 @@ var config = [
 module.exports = config;
 ```
 
-We have separate configurations for the server and the client, since we need to compile both from typescript to javascript.  We could set up the project to avoid using webpack to transpile the server code, but I opted to go down this route.
+We have separate configurations for the server and the client, since we need to compile both from typescript to javascript.  We could set up the project to avoid using webpack to pre-process the server code, but I opted to go down this route.
+
+# Create the React App
+
+Our front end will be implemented using React, but for this part of the tutorial we will only go as far as printing out "Hello World" to the dom.
+
+Our one component is going to be very simple:
+
+_AppRoot.tsx_
+```ts
+import * as React from "react";
+
+export class AppRoot extends React.Component<{}> {
+    constructor(p: {}) {
+        super(p);
+    }
+
+    render() {
+        return "Hello World";
+    }
+}
+```
+
+and the entry point to our client javascript:
+
+_boot-client.tsx_
+```ts
+import * as React from 'react';
+import * as ReactDOM from 'react-dom'
+import {AppRoot} from "./components/AppRoot";
+
+const message: string = "this is the client";
+console.log(message);
+
+ReactDOM.render(<AppRoot/>, document.getElementById('root'));
+```
