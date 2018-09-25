@@ -1,3 +1,5 @@
+[[_TOC_]]
+
 # Overview
 
 In this project, I will be using a node server running express.  However, this guide is mostly independent of the actual server architecture used.  I chose node because it requires very little configuration, and because we will already need to use it to run webpack.
@@ -352,11 +354,68 @@ function onListening(): void {
 
 Since node doesn't natively understand TypeScript, we have included this as a part of our webpack build process.  Webpack will convert the TypeScript code into JavaScript that node can understand and run.  Now, when you run `npm run build` in the console, you should find that in addition to the client being compiled into a `bundle.js` file, the server code will be built into the build folder as `main.js`.
 
+# Running the demo
+
 We can now run the following commands to compile our code and run the server
 `npm run build`
-`node ./build/main.js`
+```
+> npm run build
 
-Once the server is running, you can navigate to `localhost:3000` in a web browser to check that it is working.  I also recommend adding an npm script to the package.json file to host the server:
+> react-demo@1.0.0 build C:\Users\Matt\Documents\gitkraken\react-demo\node
+> webpack --mode=development
+
+i ｢atl｣: Using typescript@3.0.3 from typescript
+i ｢atl｣: Using tsconfig.json from C:/Users/Matt/Documents/gitkraken/react-demo/node/tsconfig.json
+i ｢atl｣: Using typescript@3.0.3 from typescript
+i ｢atl｣: Using tsconfig.json from C:/Users/Matt/Documents/gitkraken/react-demo/node/tsconfig.json
+i ｢atl｣: Checking started in a separate process...
+i ｢atl｣: Time: 74ms
+i ｢atl｣: Checking started in a separate process...
+i ｢atl｣: Time: 36ms
+Hash: 743e889d2595ff9c98dbfff76cc22d007244b3c0
+Version: webpack 4.20.1
+Child
+    Hash: 743e889d2595ff9c98db
+    Time: 5933ms
+    Built at: 09/25/2018 4:39:12 PM
+                  Asset     Size  Chunks             Chunk Names
+        build/bundle.js  744 KiB    main  [emitted]  main
+    build/bundle.js.map  861 KiB    main  [emitted]  main
+    Entrypoint main = build/bundle.js build/bundle.js.map
+    [./src/web/boot-client.tsx] 319 bytes {main} [built]
+    [0] multi ./src/web/boot-client.tsx 28 bytes {main} [built]
+        + 12 hidden modules
+Child
+    Hash: fff76cc22d007244b3c0
+    Time: 5259ms
+    Built at: 09/25/2018 4:39:12 PM
+      Asset      Size  Chunks             Chunk Names
+    main.js  6.89 KiB    main  [emitted]  main
+    Entrypoint main = main.js
+    [./src/server/App.ts] 896 bytes {main} [built]
+    [./src/server/main.ts] 541 bytes {main} [built]
+    [express] external "express" 42 bytes {main} [built]
+    [http] external "http" 42 bytes {main} [built]
+    [path] external "path" 42 bytes {main} [built]
+    [0] multi ./src/server/main.ts 28 bytes {main} [built]
+```
+`node ./build/main.js`
+```
+> npm run host
+
+> react-demo@1.0.0 host C:\Users\Matt\Documents\gitkraken\react-demo\node
+> node ./build/main.js
+
+this is the server
+server env: development
+Listening on port 3000
+```
+
+Once the server is running, you can navigate to `localhost:3000` in a web browser to check that it is working.
+
+![image.png](/.attachments/image-22c56936-f5e9-4908-a47e-ff8bf39cae7f.png)
+
+I also recommend adding an npm script to the package.json file to host the server:
 
 ```json
   ...
@@ -369,4 +428,4 @@ Once the server is running, you can navigate to `localhost:3000` in a web browse
   ...
 ```
 
-This lets us run `npm run host` instead of `node ./build/main.js`.
+This lets us use `npm run host` instead of `node ./build/main.js` in the console.
