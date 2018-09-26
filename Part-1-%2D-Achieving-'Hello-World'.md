@@ -339,7 +339,7 @@ console.log(`server env: ${process.env.NODE_ENV}`);
 
 const app = new App().express;
 const port =  3000;
-app.set('port', 3000);
+app.set('port', port);
 //create a server and pass our Express app to it.
 const server = http.createServer(app);
 server.listen(port);
