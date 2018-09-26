@@ -2,7 +2,7 @@
 
 # Overview
 
-In this project, I will be using a node server running express.  However, this guide is mostly independent of the actual server architecture used.  I chose node because it requires very little configuration, and because we will already need to use it to run webpack.
+This tutorial is intended as a new developer's guide to setting up the basics to get started developing a react application.  This application will be written in TypeScript, and will be built using Webpack.  In this project, I will be using a node server running express.  However, this guide is mostly independent of the actual server architecture used.  I chose node because it requires very little configuration, and because we will already need to use it to run webpack.
 
 # Prerequisites
 
