@@ -27,7 +27,27 @@ In our Slack clone, here is a high level overview of the actions that users shou
  - Join Channels
  - Invite Users to Channels
  - Leave Channels
- - Send Messages to a channel
- - Send Messages to a specific user (direct message)
+ - Send Messages
+	 - To a channel
+	 - To a specific user (direct message)
  - Hard-Delete Messages
+
+Additional requirements
+ - There is automatically a 'General' public channel that all users are automatically a member of.
+ - When a channel owner leaves, the user who has been a channel member the longest becomes the new owner.
+ - A private channel with no members should be deleted
+
+## Implementation notes
+
+In this application, messaging will be done through websockets, but most other things will be handled through a REST API.  It is important to keep in mind that the concept of joining/leaving a channel is separate from connecting/disconnecting from it.  A member who has joined the channel but is not connected to it is simply offline, but a member who has not joined or has left the channel can not connect.
+
+When connected to a channel, a socket is created and the following events are automatically broadcast:
+ - A user joins, is edited, or leaves the channel
+ - The channel is edited or deleted
+ - A message is sent or deleted in the channel
+ - A user connects or disconnects from the channel (comes online/goes offline)
+
+The following entities are managed through a REST API and not through a socket.
+ - Users
+ - Channels (creating, searching, editing, etc)
 
