@@ -8,3 +8,26 @@ As a part of this tutorial series, I will also be implementing a back end using 
  ## Description
 
 The Slack clone that we will be putting together in this application was chosen because it is something that almost any developer will be familiar with.  It is conceptually simple, but still provides enough depth to showcase many technologies and designs.  While Slack provides a ton of various features and utilities, we will limit the scope of our clone to just the channels and messaging portion, similar to an IRC service.
+
+## Requirements
+
+In our Slack clone, here is a high level overview of the actions that users should be able to perform:
+ - Add Users
+ - Edit Users
+ - Soft-Delete Users
+ - Create Channels
+	 - Private Channels
+	 - Public Channels
+ - Edit Channels
+	 - Rename channel
+	 - Change channel owner
+	 - Change who can invite to this channel
+ - Soft-Delete Channels
+ - Search for Channels
+ - Join Channels
+ - Invite Users to Channels
+ - Leave Channels
+ - Send Messages to a channel
+ - Send Messages to a specific user (direct message)
+ - Hard-Delete Messages
+
