@@ -36,7 +36,7 @@ Additional requirements
  - There is automatically a 'General' public channel that all users are automatically a member of.
  - When a channel owner leaves, the user who has been a channel member the longest becomes the new owner.
  - A private channel with no members should be deleted.
- - Messages may have special markup that gets rendered differently from plain text.
+ - Messages support special markup that gets rendered differently from plain text.
 
 ## Implementation notes
 
