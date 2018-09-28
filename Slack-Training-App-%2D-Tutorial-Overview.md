@@ -36,6 +36,7 @@ Additional requirements
  - There is automatically a 'General' public channel that all users are automatically a member of.
  - When a channel owner leaves, the user who has been a channel member the longest becomes the new owner.
  - A private channel with no members should be deleted.
+ - Messages may have special markup that gets rendered differently from plain text.
 
 ## Implementation notes
 
@@ -51,3 +52,35 @@ The following entities are managed through a REST API and not through a socket.
  - Users
  - Channels (creating, searching, editing, etc)
 
+## Entities
+
+### User
+ - UserId (Primary Key)
+ - Username (Unique Key, cannot be changed, used for authentication)
+ - Display Name
+ - Email
+ - Status
+ - Description
+
+### Channel
+ - ChannelId (Primary Key)
+ - Owner (Optional, Foreign Key)
+ - Display Name
+ - IsPublic (boolean)
+ - CanAnyoneInvite (boolean)
+ - IsGeneral (boolean)
+ - IsActiveDirectMessage (boolean)
+
+### Message
+ - MessageId (Primary Key)
+ - ChannelId (Foreign Key)
+ - UserId (Foreign Key)
+ - Timestamp
+ - Message
+ - IsEdited (boolean)
+
+### UserChannel
+ - UserChannelId (Primary Key)
+ - UserId (Foreign Key, Unique Key part 1)
+ - ChannelId (Foreign Key, Unique Key part 2)
+ - JoinDate
