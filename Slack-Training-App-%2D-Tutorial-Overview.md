@@ -36,7 +36,7 @@ Additional requirements
  - There is automatically a 'General' public channel that all users are automatically a member of.
  - When a channel owner leaves, the user who has been a channel member the longest becomes the new owner.
  - A private channel with no members should be deleted.
- - Messages support special markup that gets rendered differently from plain text.
+ - Messages support special markup that gets rendered differently from plain text.  Of course, this will include emojis.
  - As long as a channel is 'alive', it should be possible to view the full message history.
 
 ## Implementation notes
@@ -90,3 +90,9 @@ Many to Many relationship between Users and Channels
  - UserId (Foreign Key, Unique Key part 1)
  - ChannelId (Foreign Key, Unique Key part 2)
  - JoinDate
+
+### Emoji
+ - EmojiId (Primary Key)
+ - Name (Unique Key)
+ - Display Name
+ - Url
