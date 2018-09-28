@@ -37,6 +37,7 @@ Additional requirements
  - When a channel owner leaves, the user who has been a channel member the longest becomes the new owner.
  - A private channel with no members should be deleted.
  - Messages support special markup that gets rendered differently from plain text.
+ - As long as a channel is 'alive', it should be possible to view the full message history.
 
 ## Implementation notes
 
@@ -51,6 +52,10 @@ When connected to a channel, a socket is created and the following events are au
 The following entities are managed through a REST API and not through a socket.
  - Users
  - Channels (creating, searching, editing, etc)
+
+Direct messages between two proper are implemented as a private channel with no owner.  It is created automatically when one of the two users sends a direct message to the other.  If one of the two users leaves, then the next private message between them will start a new channel.
+
+Although a user may be connected to many channels at once, they will only use one socket connection per browser session.  This socket will also be used for direct messaging.  In this sense, a user will effectively connect/disconnect from all channels at the same time (come online/go offline).
 
 ## Entities
 
@@ -68,8 +73,8 @@ The following entities are managed through a REST API and not through a socket.
  - Display Name
  - IsPublic (boolean)
  - CanAnyoneInvite (boolean)
- - IsGeneral (boolean)
- - IsActiveDirectMessage (boolean)
+ - IsGeneral (boolean) - Is this channel the special 'general' channel
+ - IsActiveDirectMessage (boolean) - Is this channel a direct message channel between two users (neither of which have 'left').
 
 ### Message
  - MessageId (Primary Key)
@@ -80,6 +85,7 @@ The following entities are managed through a REST API and not through a socket.
  - IsEdited (boolean)
 
 ### UserChannel
+Many to Many relationship between Users and Channels
  - UserChannelId (Primary Key)
  - UserId (Foreign Key, Unique Key part 1)
  - ChannelId (Foreign Key, Unique Key part 2)
