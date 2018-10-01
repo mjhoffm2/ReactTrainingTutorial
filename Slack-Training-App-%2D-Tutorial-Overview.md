@@ -53,7 +53,9 @@ The following entities are managed through a REST API and not through a socket.
  - Users
  - Channels (creating, searching, editing, etc)
 
-Direct messages between two proper are implemented as a private channel with no owner.  It is created automatically when one of the two users sends a direct message to the other.  If one of the two users leaves, then the next private message between them will start a new channel.
+It might make more sense to simply do everything through the web socket and not have any sort of REST API at all.  However, for the sake of the tutorial, I chose to have a REST API for some actions since they are more generally applicable.
+
+Direct messages between two users are implemented as a private channel with no owner.  It is created automatically when one of the two users sends a direct message to the other.  If one of the two users leaves, then the next private message between them will start a new channel.
 
 Although a user may be connected to many channels at once, they will only use one socket connection per browser session.  This socket will also be used for direct messaging.  In this sense, a user will effectively connect/disconnect from all channels at the same time (come online/go offline).
 
