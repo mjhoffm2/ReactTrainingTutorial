@@ -152,6 +152,7 @@ Again, it is important to understand that the code above is still just type defi
 
 Finally, we need to bring everything together by creating a reducer to handle our actions and calculate the next state.  As a reminder, the Reducer is a pure function which takes the current state and an action as parameters, and returns the next state.  The Reducer in this case is also responsible for setting the default state.  We could define a trivial reducer that does nothing as follows:
 
+_reducer.ts_
 ```ts
 import * as defs from '../definitions/definitions';
 import {Action} from "../actions/actionTypes";
@@ -164,6 +165,35 @@ export const rootReducer: Reducer<defs.State> = (state = initialState, action: A
 
 The reducer is initially called with a state of `undefined`, in which case your reducer should assume an initial state.  Note that it is not allowed for the reducer to return `undefined`.  In this case, the initial state set by the reducer has the `users` and `channels` properties set to `null`.  Besides setting the initial state, the reducer does nothing, and will ignore any actions passed to it and always return the same state.  Let's address that:
 
+_reducer.ts_
+```ts
+import * as defs from '../definitions/definitions';
+import {Action, ActionTypes} from "../actions/actionTypes";
+import {combineReducers, Reducer} from "redux";
 
+const initialState = { users: null, channels: null };
+
+export const rootReducer: Reducer<defs.State> = (state = initialState, action) => {
+    switch(action.type) {
+        case ActionTypes.LOAD_USERS: {
+            return {
+                ...state,
+                users: action.users
+            };
+        }
+        case ActionTypes.LOAD_CHANNELS: {
+            return {
+                ...state,
+                channels: action.channels
+            };
+        }
+    }
+    return state;
+};
+```
+
+In this new root reducer, we check the type of the action, and will return a new state if it is one of the two actions that we defined.  It is important to return the same state as before if the actions is not matched, since redux will check to see if the reference returned by your reducer is the same as the reference that was provided to detect if any changes were made.  If you are unfamiliar with the `...` syntax, that is called a spread operator.  Essentially, that will create a shallow copy of the object.  This is very often seen in React and Redux due to the fact that state needs to be kept immutable.  Therefore, being able to create a shallow copy with a couple of differences in a concise way is very useful.
+
+Of course, at this point all we have done is defined a function.  We still need to set up redux to use this function as our reducer in our application.
 
 ## React-Router
