@@ -37,17 +37,12 @@ _package.json_
   "dependencies": {
     "@types/express": "^4.16.0",
     "@types/react": "^16.4.13",
-    "@types/react-bootstrap": "^0.32.13",
     "@types/react-dom": "^16.0.7",
-    "@types/react-router": "^4.0.30",
     "awesome-typescript-loader": "^5.2.1",
     "css-loader": "^1.0.0",
     "express": "^4.16.3",
     "react": "^16.5.0",
-    "react-bootstrap": "^0.32.4",
     "react-dom": "^16.5.0",
-    "react-router": "^4.3.1",
-    "redux": "^4.0.0",
     "style-loader": "^0.23.0",
     "typescript": "^3.0.3",
     "url-loader": "^1.1.1",
@@ -67,19 +62,38 @@ With a console open to the same folder that the package.json is located in, run 
 Next, we need to set up a tsconfig.json file.  This will be used by the TypeScript compiler to convert the TypeScript we write into JavaScript.  Most IDEs will also use this for syntax highlighting and improved code completion.  Again, I will provide a minimal starting version to save time:
 
 _tsconfig.json_
-```json
+```js
 {
   "compilerOptions": {
-    //use strict type checking
+    //Use strict type checking
+    //This makes it so 'null' and 'undefined' are considered explicit values
+    //It shows type errors where types could not be inferred, among other things
     "strict": true,
 
-    "jsx": "react"
+    //Transforms react JSX syntax into React.createElement() calls
+    "jsx": "react",
+
+    //Tell the TypeScript compiler what libraries we expect to exist
+    //In this case, we expect the user's browser to have ES5 support and a dom
+    "lib": ["es5", "dom"],
+
+    //By declaring the target to be ES6, this sets the compilation target for the typescript compiler.
+    //We don't need this to compile all the way down to ES3/5, webpack will handle that.
+    //In addition to setting the compilation target, this also causes ES6 modules to be used instead of CommonJS
+    //This is important since it enables webpack to do tree shaking optimizations (dead code removal)
+    "target": "es6",
+
+    //When setting "module": "es6" or "target": "es6", the typescript compiler defaults to the "classic" module resolution strategy
+    //It is important that we use the "node" module resolution strategy instead to properly resolve our imports
+    "moduleResolution": "node"
   },
   "exclude": [
     "node_modules"
   ]
 }
 ```
+
+One important thing that this tsconfig is doing is defining how modules are going to be hooked up.  By default, the TypeScript compiler will output CommonJS modules.  While these will work just fine, they prevent webpack from performing important tree-shaking optimizations.  Therefore, it is important to make sure that ES6 modules are used instead.  If you want to target es3 or es5 instead of es6+ with the TypeScript compiler, then you should add `"module": "es6"` to the compiler options to ensure that ES6 modules are used.
 
 We will be invoking the TypeScript compiler as a part of our webpack build process, so we don't need to use it to transpile down to browser-compatible code yet.
 
