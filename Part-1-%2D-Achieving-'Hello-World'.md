@@ -263,7 +263,10 @@ var config = [
     {
         entry: ['./src/server/main.ts'],
         target: 'node',
+
+        //make sure that webpack doesn't waste time compiling and bundling code that is already available in node
         externals: [nodeExternals()],
+
         output: {
             path: path.resolve(__dirname, './build'),
             filename: '[name].js',
