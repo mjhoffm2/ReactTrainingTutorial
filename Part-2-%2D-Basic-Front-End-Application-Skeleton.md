@@ -194,6 +194,20 @@ export const rootReducer: Reducer<defs.State> = (state = initialState, action) =
 
 In this new root reducer, we check the type of the action, and will return a new state if it is one of the two actions that we defined.  It is important to return the same state as before if the actions is not matched, since redux will check to see if the reference returned by your reducer is the same as the reference that was provided to detect if any changes were made.  If you are unfamiliar with the `...` syntax, that is called a spread operator.  Essentially, that will create a shallow copy of the object.  This is very often seen in React and Redux due to the fact that state needs to be kept immutable.  Therefore, being able to create a shallow copy with a couple of differences in a concise way is very useful.
 
-Of course, at this point all we have done is defined a function.  We still need to set up redux to use this function as our reducer in our application.
+Of course, at this point all we have done is defined a function.  We still need to set up redux to use this function as our reducer in our application.  This is done by calling the `createStore` method.
+
+_boot-client.tsx_
+```ts
+import { createStore } from "redux";
+import { rootReducer } from "./reducers/reducer";
+...
+
+const store = createStore(rootReducer);
+...
+```
+
+This creates our store using our reducer, which is now ready for use.  If we want, we can manually dispatch actions to the store using `store.dispatch( ... )`, and get the current state using `store.getState()`.  We can also subscribe to changes using `store.subscribe( ... )` and update the reducer using `store.replaceReducer( ... )`.  However, we will not be calling any of these directly.  Instead we will use the React-Redux library to manage all of these for us, among other things.
+
+## React-Redux
 
 ## React-Router
