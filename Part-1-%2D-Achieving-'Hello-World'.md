@@ -73,10 +73,7 @@ _tsconfig.json_
     //use strict type checking
     "strict": true,
 
-    "jsx": "react",
-
-    //skip type checking .d.ts files, particularly from third party libraries
-    "skipLibCheck": true
+    "jsx": "react"
   },
   "exclude": [
     "node_modules"
@@ -122,11 +119,7 @@ var config = [
                     test:/\.tsx?$/,
                     include: path.resolve(__dirname, "./src/web/"),
                     loader: "awesome-typescript-loader"
-                },
-                {
-                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf)$/,
-                    loader: 'url-loader?limit=25000'
-                },
+                }
             ]
         },
         devtool: "source-map"
@@ -139,7 +132,8 @@ The important things that the webpack configuration is doing is:
 1. Define the entry point.
 2. Define the loaders that will be used for different files.
 3. Configure how the final JavaScript bundle will be put together.
-3. Define the output location and name.
+4. Define the output location and name.
+5. Enabled the "source-map" devtool, which will allow a browser to map compiled JavaScript code back to the TypeScript source.  This is very useful when trying to debug runtime errors in your code.
 
 More information about configuring webpack can be found from the official documentation: https://webpack.js.org/configuration/
 
@@ -155,17 +149,20 @@ _main.html_
     <title>Demo</title>
 </head>
 <body>
-<div id="root"></div>
-<script src="./build/bundle.js"></script>
+    <div id="root"></div>
+    <script src="./build/bundle.js"></script>
 </body>
 </html>
 ```
 
 This simply creates a single html element for react to mount to, and includes the bundle created by webpack as a script.
 
+Make sure that the location of the main.html file and the location of the bundle.js file (to be generated) are set up correctly.
+![image.png](/.attachments/image-06bf3cc5-c359-49d3-98db-da7fbb879bc4.png)
+
 # Create the React App
 
-Our front end will be implemented using React, but for this part of the tutorial we will only go as far as printing out "Hello World" to the dom.
+Our front end will be implemented using React, but for this part of the tutorial we will only go as far as printing out "Hello World" to the dom.  To accomplish this, we will create two .tsx files.  A .tsx is the file extension for a TypeScript file with JSX syntax enabled.
 
 Our one component is going to be very simple:
 
@@ -192,6 +189,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom'
 import {AppRoot} from "./components/AppRoot";
 
+//make sure TypeScript is working
 const message: string = "this is the client";
 console.log(message);
 
@@ -241,11 +239,7 @@ var config = [
                     test:/\.tsx?$/,
                     include: path.resolve(__dirname, "./src/web/"),
                     loader: "awesome-typescript-loader"
-                },
-                {
-                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf)$/,
-                    loader: 'url-loader?limit=25000'
-                },
+                }
             ]
         },
         devtool: "source-map"
@@ -290,7 +284,7 @@ We could also use separate tsconfig.json files for both the server and the clien
 
 ## Server Code
 
-We will configure our server to run from port 3000 on our localhost, and will server the static main.html file when a user requests the "/" url.  The following code will accomplish this:
+We will configure our server to run from port 3000 on our localhost, and will serve the static main.html file when a user requests the "/" url.  The following code will accomplish this:
 
 _App.ts_
 ```ts
