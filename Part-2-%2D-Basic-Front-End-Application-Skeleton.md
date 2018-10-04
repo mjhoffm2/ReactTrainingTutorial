@@ -504,7 +504,56 @@ export const ChannelList: React.ComponentClass<params> =
     connect(mapStateToProps, mapDispatchToProps)(ChannelListComponent);
 
 ```
+The `connect()` method returns a function that we can pass our `ChannelListComponent` to, creating a new 'higher-order' component called `ChannelList`.  This component can then be exported and used elsewhere in the application.  This higher-order component will automatically get the props it needs from the Redux store, so they don't need to be provided by a parent component.  In the case of this component, there are no props at all to be provided by the parent component, as defined in the `params` interface.  We update our `AppRoot` component to use our new `ChannelList` higher-order component.
 
+_AppRoot.tsx_
+```ts
+import * as React from "react";
+import {ChannelList} from "./Channels";
+
+export class AppRoot extends React.Component<{}> {
+    constructor(p: {}) {
+        super(p);
+    }
+
+    render() {
+        return (
+            <div>
+                <h2>Hello World</h2>
+                <ChannelList />
+            </div>
+        );
+    }
+}
+```
+
+
+
+### The Provider
+
+In order for the Redux store to actually be available to our higher-order components that we create using `connect()`, we need to make the store available.  This is done using the `<Provider />` component provided by `React-Redux`.  We will update our `boot-client.tsx` file, which is the entry point to our React application, to use this component.
+
+_boot-client.tsx_
+```ts
+import * as React from 'react';
+import * as ReactDOM from 'react-dom'
+import {rootReducer} from "./reducers/reducer";
+import {createStore} from "redux";
+import {Provider} from 'react-redux';
+import {AppRoot} from "./components/AppRoot";
+
+const message: string = "this is the client";
+console.log(message);
+
+const store = createStore(rootReducer);
+
+ReactDOM.render(
+    <Provider store={store}>
+            <AppRoot/>
+    </Provider>,
+    document.getElementById('root')
+);
+```
 
 
 ## React-Router
