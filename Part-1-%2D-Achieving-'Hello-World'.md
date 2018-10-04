@@ -77,11 +77,10 @@ _tsconfig.json_
     //In this case, we expect the user's browser to have ES5 support and a dom
     "lib": ["es5", "dom"],
 
-    //By declaring the target to be ES6, this sets the compilation target for the typescript compiler.
-    //We don't need this to compile all the way down to ES3/5, webpack will handle that.
-    //In addition to setting the compilation target, this also causes ES6 modules to be used instead of CommonJS
+    //This causes ES6 modules to be used instead of CommonJS
     //This is important since it enables webpack to do tree shaking optimizations (dead code removal)
-    "target": "es6",
+    //This has nothing to do with the compilation target, which is still ES3 by default
+    "module": "es6",
 
     //When setting "module": "es6" or "target": "es6", the typescript compiler defaults to the "classic" module resolution strategy
     //It is important that we use the "node" module resolution strategy instead to properly resolve our imports
