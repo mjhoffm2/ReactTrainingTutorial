@@ -260,8 +260,115 @@ This creates our store using our reducer, which is now ready for use.  If we wan
 In order to connect our React components to Redux, we will use a library called `React-Redux`.  This will give us an easy way to have components subscribe and re-render in response to changes in the Redux store, as well as dispatch actions to update the store.
 
 The entire API for React-Redux boils down to two simple pieces.
-1. The `<Provider />` components - This component can be placed at or near the root of your React application, which will make the Redux store available for the rest of the application, without needing to pass the store explicitly through to each component.
+1. The `<Provider />` component - This component can be placed at or near the root of your React application, which will make the Redux store available for the rest of the application, without needing to pass the store explicitly through to each component.
 2. The `connect()` method - This method is used to create 'higher order' components, and encapsulates the process of getting data into and out of the Redux store.  The idea is that you can write a React component which uses a bunch of data from the Redux store via props, and then use the `connect()` method to wrap the component and export it such that the parent doesn't need to provide that data via props.
+
+You can read more information from the official documentation: https://github.com/reduxjs/react-redux/blob/master/docs/GettingStarted.md
+
+### Using the Redux store via React-Redux
+
+Let's make a new React component called `ChannelListComponent`.  This component will render all the channels in the Redux store, and will also be in charge of loading them.  We could set up our node server to have an API endpoint which returns this data, but for now we will just hard code some data.
+
+```ts
+const tempChannels: defs.Channel[] = [{
+    channelId: 1,
+    displayName: "General",
+    canAnyoneInvite: true,
+    isActiveDirectMessage: false,
+    isGeneral: true,
+    isPublic: true,
+    ownerId: null
+}, {
+    channelId: 2,
+    displayName: "Random",
+    canAnyoneInvite: true,
+    isActiveDirectMessage: false,
+    isGeneral: false,
+    isPublic: true,
+    ownerId: 1
+}, {
+    channelId: 3,
+    displayName: "Secret",
+    canAnyoneInvite: false,
+    isActiveDirectMessage: false,
+    isGeneral: false,
+    isPublic: false,
+    ownerId: 1
+}];
+```
+
+Next up, we will define a couple of interfaces.  First we need to define an interface for the props that we will receive from the parent component.  In this case, we don't need any parameters from the parent component.
+```ts
+interface params { }
+```
+Next, we define an interface for the data we will get from the Redux store:
+```ts
+interface connectedState {
+    channels: defs.Channel[] | null;
+}
+```
+Finally, we define an interface for the callback method we need to dispatch an action to load the channels into the Redux store.  This describes a callback which will asyncronously load a list of channels, and then dispatch an action to update the Redux store to contain those channels.  That implementation will come later.
+```ts
+interface connectedDispatch {
+    reloadChannels: () => Promise<void>;
+}
+```
+Now that we have all these interfaces set up, we can combine all of them together to create the complete `props` for our `ChannelListComponent`.
+```ts
+type fullParams = params & connectedState & connectedDispatch;
+```
+
+Now let's actually implemented our component:
+
+_Channels.tsx_
+```ts
+import * as React from 'react';
+import * as defs from '../definitions/definitions';
+
+interface params {}
+
+interface connectedState {
+    channels: defs.Channel[] | null;
+}
+
+interface connectedDispatch {
+    reloadChannels: () => Promise<void>;
+}
+
+type fullParams = params & connectedState & connectedDispatch;
+
+class ChannelListComponent extends React.Component<fullParams> {
+
+    componentDidMount() {
+        this.props.reloadChannels();
+    }
+
+    render() {
+        return (
+            <div>
+                <div>
+                    <h3>
+                        Available Channels
+                    </h3>
+                </div>
+                <div>
+                    {
+                        this.props.channels ?
+                            this.props.channels.map(channel =>
+                                <div key={channel.channelId}>
+                                    {channel.displayName}
+                                </div>
+                            ) :
+                            "Loading..."
+                    }
+                </div>
+            </div>
+        );
+    }
+}
+
+```
+
 
 ## React-Router
 
