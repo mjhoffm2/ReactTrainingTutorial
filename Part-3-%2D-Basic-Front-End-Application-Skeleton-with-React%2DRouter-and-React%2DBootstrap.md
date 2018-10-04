@@ -17,7 +17,7 @@ Primary technologies in this part of the tutorial:
 
 All of the dependencies that we need for this part of the tutorial were included in the `package.json` file from the previous part.
 
-## React-Router
+# React-Router
 
 ### Overview
 
@@ -127,13 +127,13 @@ We should see the following when we navigate to http://localhost:3000
 
 ![image.png](/.attachments/image-6e279c1e-5fa1-4b23-ab22-debf94974fc2.png)
 
-If we Click on the 'Go to channel list', we should see the `ChannelList` component shown.
+If we Click on the 'Go to channel list' link, we should see the `ChannelList` component shown:
 
 ![image.png](/.attachments/image-7293126d-bbe1-416d-924c-6f221409e495.png)
 
 So far so good.
 
-However, if you try to do a hard refresh on the page (F5), you may see something similar to this.
+However, if you try to do a hard refresh on the page (F5), you may see something similar to this:
 
 ![image.png](/.attachments/image-a9418a82-5bcb-4576-adc0-a58b7e07164a.png)
 
@@ -431,7 +431,28 @@ We can rebuild and re-run the server to take a look at what this looks like so f
 
 With any luck, you should be able to see something similar to the above images.
 
-## Connected-React-Router
+# Connected-React-Router
+
+In a nutshell, what we have done with React-Router is integrate the state from the url into React.  Depending on the application, it might make sense to also integrate that state with Redux.  These bindings can be accomplished using Connected-React-Router.  In my experience, this is entirely optional and is more of an organizational decision than a functional one.  If you like the idea of keeping navigational state in Redux, and updating the page location by dispatching Redux actions, then this library is for you.
+
+### Update the State
+
+We will need to update our State definition to include the state which will be used by Connected-React-Router
+
+_stateDefinitions.ts_
+```ts
+import { RouterState } from 'connected-react-router';
+
+export interface State {
+    users: User[] | null;
+    channels: Channel[] | null;
+    router: RouterState;
+}
+
+...
+```
+
+We will also need to update the way our store is created 
 
 ## React-Bootstrap
 
