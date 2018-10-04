@@ -943,7 +943,7 @@ _webpack.config.js_
 # Putting it all together
 ## File Structure
 
-![image.png](/.attachments/image-ece5bf3a-b73a-4fdf-b0a2-26fd034b148a.png)
+![image.png](/.attachments/image-40622091-fc93-4c35-837d-e4ed773ec115.png)
 
 ## Build and Run
 ## Download Source
