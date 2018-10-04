@@ -115,8 +115,8 @@ var config = [
     {
         entry: ['./src/web/boot-client.tsx'],
         output: {
-            path: path.resolve(__dirname, './public'),
-            filename: 'build/bundle.js',
+            path: path.resolve(__dirname, './public/build'),
+            filename: 'bundle.js',
         },
         resolve: {
             //automatically infer '.ts' and '.tsx' when importing files
