@@ -79,7 +79,7 @@ _tsconfig.json_
 
     //This causes ES6 modules to be used instead of CommonJS
     //This is important since it enables webpack to do tree shaking optimizations (dead code removal)
-    //This has nothing to do with the compilation target, which is still ES3 by default
+    //This is different from the compilation target, which is still ES3 by default
     "module": "es6",
 
     //When setting "module": "es6" or "target": "es6", the typescript compiler defaults to the "classic" module resolution strategy
