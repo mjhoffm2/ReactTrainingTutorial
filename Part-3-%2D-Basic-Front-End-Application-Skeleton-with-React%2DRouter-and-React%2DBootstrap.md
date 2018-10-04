@@ -136,7 +136,11 @@ However, if you try to do a hard refresh on the page (F5), you may see something
 
 ![image.png](/.attachments/image-a9418a82-5bcb-4576-adc0-a58b7e07164a.png)
 
-The issue here is that while our front end knows how to handle the `/channels` route, our node server doesn't know it.  All we did is configure it to serve the `main.html` file when a user requests the `/` url.  When a user tries to request the `/channels` url, the server decides it doesn't exist and gives us a 404 error.
+Refreshing the perfectly valid page has resulted in a 404 error.
+
+### Adjust the Server
+
+The issue above is that while our front end knows how to handle the `/channels` route, our node server doesn't know it.  All we did is configure it to serve the `main.html` file when a user requests the `/` url.  When a user tries to request the `/channels` url, the server decides it doesn't exist and gives us a 404 error.  This doesn't happen when a user first requests the index page at `/`, and then navigates to `/channels` using the client-sided router.
 
 The fix for this is extremely simple, but it is important to understand the logic behind it and the implications of making the fix.  We will simply change the url which serves the index page from `"/"` to `"*"`.
 
@@ -178,9 +182,28 @@ export class App {
 }
 ```
 
-Now, every request to the server that doesn't match a previously configured route will end up fetching the `main.html` file.  In this situation, the only route that won't serve the `main.html` file is a request for a static file such as 
+Now, every request to the server that doesn't match a previously handled route will end up fetching the `main.html` file.  In this situation, the only route that won't serve the `main.html` file is a request for a static file such as a request for the `bundle.js` file.  However, this has introduced new problems.  If a user tries to download a file which has been removed, normally we would want them to get a 404 error.  However, instead they will be served main.html.  This is a problem we will not be addressing here.
 
-### Adjust the Server
+On a related note, we now have a problem with our main.html file.  When we request `<script src="./build/bundle.js"></script>`, this is dependent on the url.  If a user tries to request the url `/channels/part2`, then their browser will attempt to download the javascript bundle from `/channels/build/bundle.js`, which doesn't exist.  Instead of getting a 404 error, they will get served the main.html file again, which the browser will try to parse as JavaScript and fail.
+
+To fix this problem, we need to add a `<base href="/" />` tag to our html to define the base url for the page.
+
+_main.html_
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demo</title>
+    <base href="/" />
+</head>
+<body>
+    <div id="root"></div>
+    <script src="./build/bundle.js"></script>
+</body>
+</html>
+```
+
+With these fixes applied, we should find that our application is working as intended when a user tries to directly request a sub-page.
 
 ## Connected-React-Router
 
