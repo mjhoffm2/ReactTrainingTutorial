@@ -637,6 +637,9 @@ Now, we can call things like `this.props.dispatch('/some/url/3/view');` from any
 
 # React-Bootstrap
 
+### Overview
+https://react-bootstrap.github.io/getting-started/introduction
+
 ### Examples
 
 _Home.tsx_
@@ -900,6 +903,35 @@ export const ViewChannel: React.ComponentClass<params> =
 
 ### Including Bootstrap CSS
 
+_boot-client.tsx_
+```ts
+import 'bootstrap/dist/css/bootstrap.css'
+```
+
+_webpack.config.js_
+```js
+...
+        module: {
+            rules: [
+                {
+                    test:/\.css$/,
+                    use:['style-loader','css-loader'],
+                },
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/web/"),
+                    loader: "awesome-typescript-loader"
+                },
+                {
+                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf|woff|woff2|eot)$/,
+                    loader: 'url-loader?limit=25000'
+                }
+            ]
+        }
+...
+```
+
+
 ### What it should look like
 
 ![image.png](/.attachments/image-ac8ecac5-93fe-4e7e-996e-1e91a7bdbe3c.png)
@@ -908,4 +940,10 @@ export const ViewChannel: React.ComponentClass<params> =
 
 ![image.png](/.attachments/image-1ad3cc4d-6d2d-49aa-8bba-e003a519b110.png)
 
-# Download Source
+# Putting it all together
+## File Structure
+
+![image.png](/.attachments/image-ece5bf3a-b73a-4fdf-b0a2-26fd034b148a.png)
+
+## Build and Run
+## Download Source
