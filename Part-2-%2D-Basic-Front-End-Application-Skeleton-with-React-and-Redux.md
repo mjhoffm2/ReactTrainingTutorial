@@ -310,6 +310,17 @@ In the above code, we have defined an interface called `State` which describes a
 
 As a reminder, this code is merely a type definition, no JavaScript will actually get created from it.
 
+I recommend organizing the various types and interfaces in your application into different definition files.  In this case, interfaces related to our Redux store will be stored in the `stateDefinitions.ts` file.  You can then have a single central `definitions.ts` file which will import and re-export all of the definitions from your various other definition files.  This way, you can decide to re-orgnaize and refactor your types and interfaces, and the rest of your codebase doesn't need to be updated.
+
+_definitions.ts_
+```ts
+export * from './stateDefinitions';
+```
+
+For this tutorial, I will place these files in a `definitions` folder inside the `src/web` directory:
+![image.png](/.attachments/image-08680fef-6893-4988-ade7-3a551a40e675.png)
+You can disregard the `actions` folder and `preferences.ts` file for now.
+
 ### The Actions
 
 Our skeleton application for this part of the tutorial will only have two actions.  One of them will load a list of users, the other one will load a list of channels.  Here is the code for them:
@@ -339,6 +350,10 @@ export interface loadChannelsAction {
 We will dispatch these actions after completing some kind of load.  The actions contain all the information necessary for our reducer (to be made later) to calculate the next state, which will contain the loaded users/channels.
 
 Again, it is important to understand that the code above is still just type definitions, and no JavaScript will actually get created from it (enums can optionally be represented as runtime objects).
+
+For this tutorial, I will place everything related to Redux actions in an `actions` folder located in the `src/web` directory:
+![image.png](/.attachments/image-4d9e60f8-0397-4a03-adc3-d392123de82e.png)
+
 
 ### The Reducer
 
