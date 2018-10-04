@@ -138,6 +138,48 @@ However, if you try to do a hard refresh on the page (F5), you may see something
 
 The issue here is that while our front end knows how to handle the `/channels` route, our node server doesn't know it.  All we did is configure it to serve the `main.html` file when a user requests the `/` url.  When a user tries to request the `/channels` url, the server decides it doesn't exist and gives us a 404 error.
 
+The fix for this is extremely simple, but it is important to understand the logic behind it and the implications of making the fix.  We will simply change the url which serves the index page from `"/"` to `"*"`.
+
+_App.ts_
+```ts
+import * as express from "express";
+import * as path from "path";
+
+export class App {
+    // ref to Express instance
+    public express: express.Application;
+    //Run configuration methods on the Express instance.
+    constructor() {
+        this.express = express();
+        this.configureMiddleWare();
+
+        //configure endpoints that are handled by api calls
+        this.configureApi();
+
+        //static files
+        this.express.use(express.static(path.join(__dirname, '/../public')));
+
+        //serve static home page for all remaining requests
+        this.express.get("*", (req, res, next) => {
+            let filePath: string = path.resolve(__dirname, '../public/main.html');
+            res.sendFile(filePath);
+        });
+    }
+
+    // Configure Express middleware.
+    private configureMiddleWare(): void {
+
+    }
+
+    // Configure API endpoints.
+    private configureApi(): void {
+
+    }
+}
+```
+
+Now, every request to the server that doesn't match a previously configured route will end up fetching the `main.html` file.  In this situation, the only route that won't serve the `main.html` file is a request for a static file such as 
+
 ### Adjust the Server
 
 ## Connected-React-Router
