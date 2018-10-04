@@ -74,7 +74,7 @@ We are using the built in `Link` component provided by `react-router-dom`.  This
 
 ### Set up the Router
 
-Similarly to React-Redux, React-Router is an interface between React and the browser's History.  Just like we used a `<Provider />` at the root of our application to set up React-Redux, we will use a `<Router />` to set up React-Router.
+Similarly to React-Redux, React-Router is an interface between React and the browser's History.  Just like we used a `<Provider />` at the root of our application to set up React-Redux, we will use a `<Router />` to set up React-Router.  We will update our `boot-client.tsx` file as follows:
 
 _boot-client.tsx_
 ```ts
