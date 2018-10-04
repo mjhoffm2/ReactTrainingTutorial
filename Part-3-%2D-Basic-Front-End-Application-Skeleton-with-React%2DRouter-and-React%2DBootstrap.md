@@ -390,7 +390,9 @@ class ChannelListComponent extends React.Component<fullParams, localState> {
                         this.props.channels ?
                             this.props.channels.map(channel =>
                                 <div key={channel.channelId}>
-                                    {channel.displayName}
+                                    <Link to={`${this.props.match.url}/${channel.channelId}/view`}>
+                                        Open {channel.displayName}
+                                    </Link>
                                 </div>
                             ) :
                             "Loading..."
@@ -415,6 +417,19 @@ class ChannelListComponent extends React.Component<fullParams, localState> {
 export const ChannelList: React.ComponentClass<params> =
     connect(mapStateToProps, mapDispatchToProps)(ChannelListComponent);
 ```
+
+The major additions to this component are:
+1. We have included a new set of routes below the list of channels.  When the url matches the `${this.props.match.url}/:channelId/view` path, then the ViewChannel component will be rendered on the page.  Otherwise, it will default to rendering a div that says 'Please select a Channel'.
+2. Each channel is now displayed as a link to open that channel.
+3. We have added a link to change the url to `/`.  This has the effect of unmounting the `ChannelList` component, and mounting the `Home` component instead.
+
+We can rebuild and re-run the server to take a look at what this looks like so far:
+
+![image.png](/.attachments/image-baa8d2c4-6086-469c-b2b1-a709e9fffe72.png)
+
+![image.png](/.attachments/image-76cf3600-28b7-405e-8be2-de2d38cd04d9.png)
+
+With any luck, you should be able to see something similar to the above images.
 
 ## Connected-React-Router
 
