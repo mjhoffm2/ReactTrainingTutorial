@@ -637,6 +637,265 @@ Now, we can call things like `this.props.dispatch('/some/url/3/view');` from any
 
 # React-Bootstrap
 
+_Home.tsx_
+```ts
+import * as React from "react";
+import {Link} from "react-router-dom";
+import {Row, Col, Grid, Panel} from "react-bootstrap";
+
+export class Home extends React.Component<{}> {
+    constructor(p: {}) {
+        super(p);
+    }
+
+    render() {
+        return (
+            <Grid>
+                <Row>
+                    <Col xs={6}>
+                        <Panel>
+                            <Panel.Heading>App Root</Panel.Heading>
+                            <Panel.Body>Hello World</Panel.Body>
+                            <Panel.Footer>
+                                <Link to='/channels'>Go to channel list</Link>
+                            </Panel.Footer>
+                        </Panel>
+                    </Col>
+                    <Col xs={6}>
+                        Content on right half of screen
+                    </Col>
+                </Row>
+            </Grid>
+        );
+    }
+}
+```
+
+_Channels.tsx_
+```ts
+import * as React from 'react';
+import * as defs from '../definitions/definitions';
+import {Route, RouteComponentProps, Switch} from "react-router";
+import {Dispatch} from "redux";
+import {Action, ActionTypes} from "../actions/actionTypes";
+import {connect} from "react-redux";
+import {ViewChannel} from "./ViewChannel";
+import {Link} from "react-router-dom";
+import {Row, Col, Grid, Panel, ListGroup, ListGroupItem, Alert} from "react-bootstrap";
+
+interface urlParams {
+    channelId: string;
+}
+
+interface params extends RouteComponentProps<urlParams> {}
+
+interface connectedState {
+    channels: defs.Channel[] | null;
+}
+
+interface connectedDispatch {
+    reloadChannels: () => Promise<void>;
+}
+
+const mapStateToProps = (state: defs.State): connectedState => ({
+    channels: state.channels
+});
+
+const mapDispatchToProps = (dispatch: Dispatch<Action>): connectedDispatch => ({
+    reloadChannels: async () => {
+        //TODO: load data from server
+
+        dispatch({
+            type: ActionTypes.LOAD_CHANNELS,
+            channels: [{
+                channelId: 1,
+                displayName: "General",
+                canAnyoneInvite: true,
+                isActiveDirectMessage: false,
+                isGeneral: true,
+                isPublic: true,
+                ownerId: null
+            }, {
+                channelId: 2,
+                displayName: "Random",
+                canAnyoneInvite: true,
+                isActiveDirectMessage: false,
+                isGeneral: false,
+                isPublic: true,
+                ownerId: 1
+            }, {
+                channelId: 3,
+                displayName: "Secret",
+                canAnyoneInvite: false,
+                isActiveDirectMessage: false,
+                isGeneral: false,
+                isPublic: false,
+                ownerId: 1
+            }]
+        });
+    }
+});
+
+type fullParams = params & connectedState & connectedDispatch;
+
+interface localState {}
+
+class ChannelListComponent extends React.Component<fullParams, localState> {
+
+    componentDidMount() {
+        this.props.reloadChannels();
+    }
+
+    render() {
+        return (
+            <Grid>
+                <Row>
+                    <Col xs={12}>
+                        <Panel>
+                            <Panel.Heading>Available Channels</Panel.Heading>
+                            {
+                                this.props.channels ?
+                                    <ListGroup>
+                                        {
+                                            this.props.channels.map(channel =>
+                                                <ListGroupItem key={channel.channelId}>
+                                                    <Row>
+                                                    <Col xs={6}>
+                                                        {channel.displayName}
+                                                    </Col>
+                                                    <Col xs={6}>
+                                                        <Link to={`${this.props.match.url}/${channel.channelId}/view`}>
+                                                            Open
+                                                        </Link>
+                                                    </Col>
+                                                    </Row>
+                                                </ListGroupItem>
+                                            )
+                                        }
+                                        </ListGroup> :
+                                    <Panel.Body>Loading...</Panel.Body>
+                            }
+                        </Panel>
+                    </Col>
+                </Row>
+                <Switch>
+                    <Route path={`${this.props.match.url}/:channelId/view`} component={ViewChannel}/>
+                    <Route
+                        render={() =>
+                            <Alert bsStyle="warning">Please select a Channel</Alert>
+                        }
+                    />
+                </Switch>
+                <Row>
+                    <Col xs={12}>
+                        <Link to='/'>
+                            Return to home
+                        </Link>
+                    </Col>
+                </Row>
+            </Grid>
+        );
+    }
+}
+
+export const ChannelList: React.ComponentClass<params> =
+    connect(mapStateToProps, mapDispatchToProps)(ChannelListComponent);
+```
+
+_ViewChannel.tsx
+```ts
+import * as React from 'react';
+import * as defs from '../definitions/definitions';
+import {RouteComponentProps} from "react-router";
+import {Dispatch} from "redux";
+import {Action} from "../actions/actionTypes";
+import {connect} from "react-redux";
+import {Link} from "react-router-dom";
+import {Row, Col, Button, Panel, Glyphicon} from "react-bootstrap";
+import {push} from "connected-react-router";
+
+interface urlParams {
+    channelId: string;
+}
+
+interface params extends RouteComponentProps<urlParams> {}
+
+interface connectedState {
+    channel: defs.Channel | null;
+}
+
+interface connectedDispatch {
+    //go to a local url
+    push: (url: string) => void;
+}
+
+const mapStateToProps = (state: defs.State, ownProps: params): connectedState => {
+    //select the specific channel from redux matching the channelId route parameter
+    if(state.channels) {
+        const channelId = parseInt(ownProps.match.params.channelId);
+        const channel = state.channels.find(channel => channel.channelId === channelId);
+
+        if(channel) {
+            return {
+                channel
+            };
+        }
+    }
+
+    return {
+        channel: null
+    };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch<Action>): connectedDispatch => ({
+    push: url => dispatch(push(url))
+});
+
+type fullParams = params & connectedState & connectedDispatch;
+
+interface localState {}
+
+class ViewChannelComponent extends React.Component<fullParams, localState> {
+
+    render() {
+        return (
+            <Row>
+                <Col xs={12}>
+                    <Panel>
+                        <Panel.Heading>
+                            Channel Id: {this.props.match.params.channelId}
+                        </Panel.Heading>
+                        <Panel.Body>
+                            {
+                                this.props.channel ?
+                                    <div>Channel Name: {this.props.channel.displayName}</div> :
+                                    <div>Loading...</div>
+                            }
+                            <Link to='/channels'>
+                                Close using a link
+                            </Link>
+                        </Panel.Body>
+                        <Panel.Footer>
+                            <Button
+                                onClick={e => {
+                                    this.props.push('/channels');
+                                }}
+                            >
+                                <Glyphicon glyph="remove"/> Close
+                            </Button>
+                        </Panel.Footer>
+                    </Panel>
+                </Col>
+            </Row>
+        );
+    }
+}
+
+export const ViewChannel: React.ComponentClass<params> =
+    connect(mapStateToProps, mapDispatchToProps)(ViewChannelComponent);
+
+```
+
 ### Examples
 
 ### Including Bootstrap CSS
