@@ -594,7 +594,7 @@ export const userReducer: Reducer<defs.State['users'], ReducerAction> = (state =
 
 export const initialChannelState: defs.State['channels'] = null;
 
-export const channelReducer: Reducer<defs.State['channels']> = (state = initialChannelState, action) => {
+export const channelReducer: Reducer<defs.State['channels'], ReducerAction> = (state = initialChannelState, action) => {
     switch(action.type) {
         case ActionTypes.LOAD_CHANNELS: {
             return action.channels;
@@ -613,6 +613,27 @@ export const rootReducer = combineReducers<stateExceptRouter, ReducerAction>({
 ```
 
 With that, we should have solved all of our TypeScript errors.
+
+### Using Connected-React-Router
+
+Now that we have hooked up React-Router to Redux, we can dispatch actions to change the page location and manipulate the browser history.  We will hook this up using React-Redux.
+
+```ts
+import * as React from 'react';
+import {Action} from "../actions/actionTypes";
+import {push} from "connected-react-router";
+
+interface connectedDispatch {
+    //go to a local url
+    push: (url: string) => void;
+}
+
+const mapDispatchToProps = (dispatch: Dispatch<Action>): connectedDispatch => ({
+    push: url => dispatch(push(url))
+});
+```
+
+Now, we can call things like `this.props.dispatch('/some/url/3/view');` from anywhere in our component to trigger a page reload.  Keep in mind, we could already do this using `this.props.history.push('some/url/3/view');` for components which were rendered from a `<Route />` component and accepted `RouteComponentProps`.  However, now this goes through Redux.
 
 # React-Bootstrap
 
