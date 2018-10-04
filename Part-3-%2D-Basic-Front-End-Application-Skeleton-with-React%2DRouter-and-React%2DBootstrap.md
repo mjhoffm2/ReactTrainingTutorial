@@ -932,7 +932,19 @@ _webpack.config.js_
 ```
 
 
-### What it should look like
+# Putting it all together
+## File Structure
+
+![image.png](/.attachments/image-40622091-fc93-4c35-837d-e4ed773ec115.png)
+
+## Build and Run
+
+```
+npm run build
+npm run host
+```
+
+## What it should look like
 
 ![image.png](/.attachments/image-ac8ecac5-93fe-4e7e-996e-1e91a7bdbe3c.png)
 
@@ -940,10 +952,5 @@ _webpack.config.js_
 
 ![image.png](/.attachments/image-1ad3cc4d-6d2d-49aa-8bba-e003a519b110.png)
 
-# Putting it all together
-## File Structure
-
-![image.png](/.attachments/image-40622091-fc93-4c35-837d-e4ed773ec115.png)
-
-## Build and Run
 ## Download Source
+https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-3
