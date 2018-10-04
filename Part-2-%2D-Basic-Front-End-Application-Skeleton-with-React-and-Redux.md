@@ -83,13 +83,13 @@ Even though we can transpile code from ES6 to ES3/5, this only transforms the sy
 For example, if we wrote the following code:
 
 ```ts
-const myFunction = () => Promise.Resolve(null);
+const myFunction = () => Promise.resolve(null);
 ```
 
 When targeting es3/5, this might be transpiled into the following:
 
 ```js
-var myFunction = function() { return Promise.Resolve(null); };
+var myFunction = function() { return Promise.resolve(null); };
 ```
 
 While transpilation can turn `const` into `var` and arrow functions into regular functions, it will leave things like `Promise.Resolve( ... )` unchanged.
@@ -439,6 +439,9 @@ export const rootReducer = combineReducers<defs.State, Action>({
 
 In this example, we have one reducer which is only concerned with the `users` part of the state, and another reducer which is only concerned with the `channels` part of the state.  These two separate reducers are then composed together into one `rootReducer` using the `combineReducers` utility.  This may look like overkill in our simple application so far, but as your application grows and the state becomes more deeply nested and complex, this is a good way to organize your code.
 
+For this tutorial, I will place everything related to Redux reducers in a `reducers` folder located in the `src/web` directory:
+![image.png](/.attachments/image-731d54c7-5a80-4899-9431-618b100e0c3e.png)
+
 ### The Store
 
 Of course, at this point all we have done is defined some type interfaces and a function called `rootReducer`.  We still need to set up redux to use this function as our reducer in our application.  This is done by calling the `createStore` method.
@@ -469,7 +472,10 @@ You can read more information from the official documentation: https://github.co
 
 ### Create a Component
 
-Let's make a new React component called `ChannelListComponent`.  This component will render all the channels in the Redux store, and will also be in charge of loading them.  
+Let's make a new React component called `ChannelListComponent`.  This component will render all the channels in the Redux store, and will also be in charge of loading them.
+
+For this tutorial, I will place this component in a file called `Channels.tsx` located in the `components` folder:
+![image.png](/.attachments/image-29db764c-792d-4230-9b57-bdc777f1c676.png)
 
 To get starting creating our component, we will define a couple of interfaces.  First we need to define an interface for the props that we will receive from the parent component.  In this case, we don't need any parameters from the parent component.
 ```ts
@@ -796,6 +802,70 @@ ReactDOM.render(
 ### File Structure
 
 ![image.png](/.attachments/image-71eb816a-bca6-403c-a4f6-73b7c55eccaf.png)
+
+### Build and Run the application
+
+```
+npm run build
+npm run host
+```
+
+```
+> npm run build
+> react-demo@1.0.0 build C:\Users\Matt Hoffman\git\react-demo\node
+> webpack --mode=development
+
+i ｢atl｣: Using typescript@3.0.3 from typescript
+i ｢atl｣: Using tsconfig.json from C:/Users/Matt Hoffman/git/react-demo/node/tsconfig.json
+i ｢atl｣: Using typescript@3.0.3 from typescript
+i ｢atl｣: Using tsconfig.json from C:/Users/Matt Hoffman/git/react-demo/node/tsconfig.json
+i ｢atl｣: Checking started in a separate process...
+i ｢atl｣: Time: 1174ms
+i ｢atl｣: Checking started in a separate process...
+i ｢atl｣: Time: 753ms
+Hash: d69fcfeb0abe91b4cd3e05fb8f65fbe47b3d2eab
+Version: webpack 4.17.2
+Child
+    Hash: d69fcfeb0abe91b4cd3e
+    Time: 7520ms
+    Built at: 2018-10-04 12:02:18
+                  Asset      Size  Chunks             Chunk Names
+        build/bundle.js   902 KiB    main  [emitted]  main
+    build/bundle.js.map  1020 KiB    main  [emitted]  main
+    Entrypoint main = build/bundle.js build/bundle.js.map
+    [./node_modules/webpack/buildin/global.js] (webpack)/buildin/global.js 509 bytes {main} [built]
+    [./node_modules/webpack/buildin/harmony-module.js] (webpack)/buildin/harmony-module.js 573 bytes {main} [built]
+    [./src/web/actions/actionTypes.ts] 192 bytes {main} [built]
+    [./src/web/boot-client.tsx] 572 bytes {main} [built]
+    [./src/web/reducers/reducer.ts] 718 bytes {main} [built]
+    [./src/web/util/polyfills.js] 1.69 KiB {main} [built]
+    [0] multi ./src/web/boot-client.tsx 28 bytes {main} [built]
+        + 48 hidden modules
+Child
+    Hash: 05fb8f65fbe47b3d2eab
+    Time: 5993ms
+    Built at: 2018-10-04 12:02:17
+      Asset      Size  Chunks             Chunk Names
+    main.js  7.81 KiB    main  [emitted]  main
+    Entrypoint main = main.js
+    [./src/server/App.ts] 819 bytes {main} [built]
+    [./src/server/main.ts] 499 bytes {main} [built]
+    [express] external "express" 42 bytes {main} [built]
+    [http] external "http" 42 bytes {main} [built]
+    [path] external "path" 42 bytes {main} [built]
+    [0] multi ./src/server/main.ts 28 bytes {main} [built]
+```
+```
+> npm run host
+
+> react-demo@1.0.0 host C:\Users\Matt Hoffman\git\react-demo\node
+> node ./build/main.js
+
+this is the server
+server env: development
+Listening on port 3000
+```
+
 
 ### What our final application should look like
 ![image.png](/.attachments/image-d71d39fd-2b5f-4935-9c21-a8097e2cc436.png)
