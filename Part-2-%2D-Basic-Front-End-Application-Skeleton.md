@@ -531,7 +531,7 @@ export class AppRoot extends React.Component<{}> {
 
 ### The Provider
 
-In order for the Redux store to actually be available to our higher-order components that we create using `connect()`, we need to make the store available.  This is done using the `<Provider />` component provided by `React-Redux`.  We will update our `boot-client.tsx` file, which is the entry point to our React application, to use this component.
+In order for the Redux store to actually be available to our higher-order components that we create using `connect()`, we need to add it to our React component tree.  This is done using the `<Provider />` component provided by `React-Redux`.  We will update our `boot-client.tsx` file, which is the entry point to our React application, to use this component.
 
 _boot-client.tsx_
 ```ts
