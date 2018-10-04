@@ -11,8 +11,7 @@ Primary technologies in this part of the tutorial:
  - React
  - TypeScript
  - Redux
- - React-Router
- - React-Bootstrap
+ - React-Redux
 
 ## Install New Dependencies
 
@@ -405,7 +404,37 @@ const mapDispatchToProps = (dispatch: Dispatch<Action>): connectedDispatch => ({
 
 export const ChannelList: React.ComponentClass<params> =
     connect(mapStateToProps, mapDispatchToProps)(ChannelListComponent);
-```  
+```
+
+#### Add support for Async/Await
+If you have been following the tutorial exactly up until this point, you might notice an error on the async method that looks like this:
+`TS2705: An async function or method in ES5/ES3 requires the 'Promise' constructor. Make sure you have a declaration for the 'Promise' constructor or include 'ES2015' in your '--lib' option.`
+
+This error is because we have declared in our tsconfig.json file that our target platform only supports the `es5` and `dom` libraries.  Since promises aren't part of es5, we will need to provide a polyfill for them.  Please refer to the Polyfills section at the bottom of this page for more information about this.  For now, we can silence this error by updating the `lib` option in our `tsconfig.json` file to declare support for Promises:
+
+_tsconfig.json_
+```js
+"compilerOptions": {
+...
+
+  //Tell the TypeScript compiler what libraries we expect to exist
+  //In this case, we expect the user's browser to have ES5 support and a dom
+  //We provide a polyfill for es2015 promises, and other polyfills provide their own definitions
+  "lib": ["es5", "dom", "es2015.promise"],
+
+...
+}
+```
+
+Then we add the following polyfill to the entry point for our code:
+
+_boot-client.tsx_
+```ts
+//polyfills for IE
+import 'es6-promise/auto';
+```
+This makes promises available to the user's browser, if it wasn't already.
+
 
 Putting everything together, our component now looks like this:
 
@@ -542,6 +571,9 @@ import {createStore} from "redux";
 import {Provider} from 'react-redux';
 import {AppRoot} from "./components/AppRoot";
 
+//polyfills for IE
+import 'es6-promise/auto';
+
 const message: string = "this is the client";
 console.log(message);
 
@@ -556,10 +588,6 @@ ReactDOM.render(
 ```
 
 
-## React-Router
+## Polyfills
 
-
-## Connected-React-Router
-
-
-## React-Bootstrap
+Even though we can transpile code from ES6 to ES3/5, this only transforms the syntax.  The actual methods and features available vary from browser to browser, and must be polyfilled.  If we wish to use ES6 promises, we need to use a polyfill to add support for Internet Explorer.
