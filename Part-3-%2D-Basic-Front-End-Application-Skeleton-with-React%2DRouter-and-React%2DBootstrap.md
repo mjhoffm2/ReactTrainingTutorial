@@ -452,7 +452,167 @@ export interface State {
 ...
 ```
 
-We will also need to update the way our store is created 
+We will also need to update the way our store is created to know how to handle navigational actions being dispatched.
+
+```ts
+//configure store based on https://github.com/supasate/connected-react-router
+const store = createStore(
+    connectRouter(history)(rootReducer),
+    compose(
+        applyMiddleware(
+            routerMiddleware(history)
+        )
+    )
+);
+```
+
+We will also be using `<ConnectedRouter />` instead of `<Router />`.  Our final `boot-client.tsx` file should look like this:
+
+_boot-client.tsx_
+```ts
+import * as React from 'react';
+import * as ReactDOM from 'react-dom'
+import createBrowserHistory from "history/createBrowserHistory";
+import {rootReducer} from "./reducers/reducer";
+import {applyMiddleware, compose, createStore} from "redux";
+import {Provider} from 'react-redux';
+import {ConnectedRouter, connectRouter, routerMiddleware} from "connected-react-router";
+import {Routes} from "./routes";
+
+//polyfills for IE
+import './util/polyfills';
+import 'es6-promise/auto';
+
+const message: string = "this is the client";
+console.log(message);
+
+const history = createBrowserHistory();
+
+//configure store based on https://github.com/supasate/connected-react-router
+const store = createStore(
+    connectRouter(history)(rootReducer),
+    compose(
+        applyMiddleware(
+            routerMiddleware(history)
+        )
+    )
+);
+
+//const store = createStore(rootReducer);
+
+ReactDOM.render(
+    <Provider store={store}>
+        <ConnectedRouter history={history}>
+            <Routes/>
+        </ConnectedRouter>
+    </Provider>,
+    document.getElementById('root')
+);
+```
+
+Finally, we add the RouterAction to our discriminated union of Actions in `actionTypes.ts`:
+
+```ts
+import {RouterAction} from "connected-react-router";
+
+export type Action = RouterAction | loadUsersAction | loadChannelsAction;
+```
+
+In a perfect world, we would be done.  Unfortunately, at the time of writing this, there are some issues with the TypeScript definitions for Connected-React-Router that will show up as errors in our application.  We need to make the following changes to fix them.
+
+First, we will export a special `ReducerAction` type which will exclude the `RouterAction` type.  Our final `actionTypes.ts` file should look like this:
+
+_actionTypes.ts_
+```ts
+import * as defs from '../definitions/definitions';
+import {RouterAction} from "connected-react-router";
+
+export enum ActionTypes {
+    LOAD_USERS = "LOAD_USERS",
+    LOAD_CHANNELS = "LOAD_CHANNELS"
+}
+
+export type ReducerAction = loadUsersAction | loadChannelsAction;
+export type Action = RouterAction | ReducerAction;
+
+export interface loadUsersAction {
+    type: ActionTypes.LOAD_USERS;
+    users: defs.User[];
+}
+
+export interface loadChannelsAction {
+    type: ActionTypes.LOAD_CHANNELS;
+    channels: defs.Channel[];
+}
+```
+
+In our `reducer.ts` file, we will replace all uses of `Action` with `ReducerAction`.
+
+Additionally, you should see a type error with the `combineReducers` call mentioning that the 'router' property is missing.  This property will be managed outside of this reducer, so we don't need our reducer to know about it.  Essentially, we want to delete the 'router' property from our type definition, but only for the reducer file.  This can be accomplished similarly to how we did the same for the `ReducerAction` type, where we would have a `ReducerState` interface that excludes the 'router' property, and then a `State` type which extends `ReducerState` to include the 'router' property.  This will work just fine, but to me it makes more sense to start with the complete `State` interface, and subtract the 'router' property from it.
+
+To accomplish this, we will use the following helper types:
+
+```ts
+//helper types
+export type KeysExcept<T, K extends keyof T> = {
+    [Key in keyof T]: K extends Key ? never : Key
+}[keyof T]
+
+export type RemoveKeys<T, K extends keyof T> = Pick<T, KeysExcept<T, K>>;
+```
+
+I recommend placing these in your definitions somewhere.
+
+The `RemoveKeys` type lets us create types which are a copy of an existing type, with specific keys deleted.  In our case, we will define:
+
+```ts
+type stateExceptRouter = RemoveKeys<defs.State, 'router'>
+```
+
+Using this, we can now use `stateExceptRouter` in our `reducer.ts` file to pretend like we don't have a 'router' property in our state.
+
+Finally, we need to change the type of our `rootReducer` by casting it to `Reducer<stateExceptRouter>`.
+
+Putting it all together, this is what our `reducer.ts` file should look like:
+
+_reducer.ts_
+```ts
+import * as defs from '../definitions/definitions';
+import {ActionTypes, ReducerAction} from "../actions/actionTypes";
+import {combineReducers, Reducer} from "redux";
+
+export const initialUserState: defs.State['users'] = null;
+
+export const userReducer: Reducer<defs.State['users'], ReducerAction> = (state = initialUserState, action) => {
+    switch(action.type) {
+        case ActionTypes.LOAD_USERS: {
+            return action.users;
+        }
+    }
+    return state;
+};
+
+export const initialChannelState: defs.State['channels'] = null;
+
+export const channelReducer: Reducer<defs.State['channels']> = (state = initialChannelState, action) => {
+    switch(action.type) {
+        case ActionTypes.LOAD_CHANNELS: {
+            return action.channels;
+        }
+    }
+    return state;
+};
+
+type stateExceptRouter = defs.RemoveKeys<defs.State, 'router'>
+
+//our root reducer ignores the 'router' state
+export const rootReducer = combineReducers<stateExceptRouter, ReducerAction>({
+    users: userReducer,
+    channels: channelReducer
+}) as Reducer<stateExceptRouter>;
+```
+
+With that, we should have solved all of our TypeScript errors.
 
 # React-Bootstrap
 
