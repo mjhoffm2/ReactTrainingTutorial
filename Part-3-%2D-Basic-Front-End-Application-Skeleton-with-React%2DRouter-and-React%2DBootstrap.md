@@ -637,6 +637,8 @@ Now, we can call things like `this.props.dispatch('/some/url/3/view');` from any
 
 # React-Bootstrap
 
+### Examples
+
 _Home.tsx_
 ```ts
 import * as React from "react";
@@ -896,12 +898,14 @@ export const ViewChannel: React.ComponentClass<params> =
 
 ```
 
-### Examples
-
 ### Including Bootstrap CSS
 
-# Putting everything together
+### What it should look like
 
-## What it should look like
+![image.png](/.attachments/image-ac8ecac5-93fe-4e7e-996e-1e91a7bdbe3c.png)
 
-## Download Source
+![image.png](/.attachments/image-9bade8f5-e4e2-4295-a17b-87fefde868af.png)
+
+![image.png](/.attachments/image-1ad3cc4d-6d2d-49aa-8bba-e003a519b110.png)
+
+# Download Source
