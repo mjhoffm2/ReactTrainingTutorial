@@ -296,7 +296,7 @@ module.exports = config;
 
 We have separate configurations for the server and the client, since we need to compile both from TypeScript to JavaScript.  We could set up the project to avoid using webpack to pre-process the server code, but I opted to go down this route.
 
-We could also use separate tsconfig.json files for both the server and the client.  I have tried this before and it works well, but I have also found that IDE's tend to not pick up the correct one.  Therefore, we will just be using the one generic tsconfig file.
+We could also use separate tsconfig.json files for both the server and the client.  I have tried this before and it works well, but I have also found that IDE's tend to not pick up the correct one.  Therefore, we will just be using the one generic tsconfig file.  The downside is that TypeScript will transpile our code into ES3 JavaScript instead of ES6+, and we cannot separately declare the libraries that are available.
 
 ## Server Code
 
