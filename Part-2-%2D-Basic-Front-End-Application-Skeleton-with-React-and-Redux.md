@@ -587,6 +587,15 @@ ReactDOM.render(
 );
 ```
 
+## Putting Everything Together
+
+### File Structure
+
+![image.png](/.attachments/image-71eb816a-bca6-403c-a4f6-73b7c55eccaf.png)
+
+### What our final application should look like
+![image.png](/.attachments/image-d71d39fd-2b5f-4935-9c21-a8097e2cc436.png)
+
 
 ## Polyfills
 
