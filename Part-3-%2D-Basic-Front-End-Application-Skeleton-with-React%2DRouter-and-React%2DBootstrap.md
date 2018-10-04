@@ -106,6 +106,10 @@ ReactDOM.render(
 
 ```
 
+![image.png](/.attachments/image-6e279c1e-5fa1-4b23-ab22-debf94974fc2.png)
+![image.png](/.attachments/image-7293126d-bbe1-416d-924c-6f221409e495.png)
+![image.png](/.attachments/image-a9418a82-5bcb-4576-adc0-a58b7e07164a.png)
+
 ### Adjust the Server
 
 ## Connected-React-Router
