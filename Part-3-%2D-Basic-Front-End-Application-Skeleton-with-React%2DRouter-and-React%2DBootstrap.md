@@ -62,12 +62,14 @@ export class AppRoot extends React.Component<{}> {
         return (
             <div>
                 <h2>Hello World</h2>
-                <Link to='/channels' />
+                <Link to='/channels'>Go to channel list</Link>
             </div>
         );
     }
 }
 ```
+
+We are using the built in `Link` component provided by `react-router-dom`.  This isn't really doing anything special, it is just performing page navigation without actually reloading the page.  This navigation is picked up by `React-Router`, which will change the component rendered by the `Routes` component.
 
 ### Set up the Router
 
@@ -106,9 +108,35 @@ ReactDOM.render(
 
 ```
 
+The important changes are:
+1. We create a history object similarly to how we created the store for Redux.
+2. We add a `<Router />` component with the history object.
+3. We are using `<Routes />` as our new root component instead of the old `<AppRoot />` (renamed to `Home`)
+
+### Try it out
+
+At this point, we can go ahead and run our code to check it out.
+
+```
+npm run build
+npm run host
+```
+
+We should see the following when we navigate to http://localhost:3000
+
 ![image.png](/.attachments/image-6e279c1e-5fa1-4b23-ab22-debf94974fc2.png)
+
+If we Click on the 'Go to channel list', we should see the `ChannelList` component shown.
+
 ![image.png](/.attachments/image-7293126d-bbe1-416d-924c-6f221409e495.png)
+
+So far so good.
+
+However, if you try to do a hard refresh on the page (F5), you may see something similar to this.
+
 ![image.png](/.attachments/image-a9418a82-5bcb-4576-adc0-a58b7e07164a.png)
+
+The issue here is that while our front end knows how to handle the `/channels` route, our node server doesn't know it.  All we did is configure it to serve the `main.html` file when a user requests the `/` url.  When a user tries to request the `/channels` url, the server decides it doesn't exist and gives us a 404 error.
 
 ### Adjust the Server
 
