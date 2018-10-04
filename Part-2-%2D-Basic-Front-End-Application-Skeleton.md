@@ -255,4 +255,18 @@ This creates our store using our reducer, which is now ready for use.  If we wan
 
 ## React-Redux
 
+### Overview
+
+In order to connect our React components to Redux, we will use a library called `React-Redux`.  This will give us an easy way to have components subscribe and re-render in response to changes in the Redux store, as well as dispatch actions to update the store.
+
+The entire API for React-Redux boils down to two simple pieces.
+1. The `<Provider />` components - This component can be placed at or near the root of your React application, which will make the Redux store available for the rest of the application, without needing to pass the store explicitly through to each component.
+2. The `connect()` method - This method is used to create 'higher order' components, and encapsulates the process of getting data into and out of the Redux store.  The idea is that you can write a React component which uses a bunch of data from the Redux store via props, and then use the `connect()` method to wrap the component and export it such that the parent doesn't need to provide that data via props.
+
 ## React-Router
+
+
+## Connected-React-Router
+
+
+## React-Bootstrap
