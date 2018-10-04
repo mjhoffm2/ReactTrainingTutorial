@@ -260,7 +260,7 @@ Alternatively, another common approach is to simply do the following:
 
 ```
 
-In this example, we have simply declared that we expect the user's browser to have full es6 support.  This is of course not going to be the case, but the idea is that we will polyfill whatever es6 methods and features we need without needing to provide a separate type definition for them.  TypeScript will simply pull those definitions from the built-in es6 type library.  The downside is that TypeScript will not show an error if you forget to polyfill something.
+In this example, we have simply declared that we expect the user's browser to have full es6 support.  This is of course not going to be the case, but the idea is that we will polyfill whatever es6 methods and features we need without needing to provide a separate type definition for them.  TypeScript will simply pull those definitions from the built-in es6 type library.  The downside is that TypeScript will not show an error if you forget to polyfill something, and you need to make sure that the polyfills you use have the same interface as the built-in definitions.
 
 # Redux
 
