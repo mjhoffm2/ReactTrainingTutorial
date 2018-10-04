@@ -78,7 +78,7 @@ Simply update or replace your existing package.json file, and run `npm install` 
 
 ### Overview
 
-Even though we can transpile code from ES6 to ES3/5, this only transforms the syntax.  The actual methods and features available vary from browser to browser, and anything not available must be polyfilled.  If we wish to use ES6 promises, we need to use a polyfill to add support for Internet Explorer.
+Before we get too far, it is important that we have an understanding of polyfills and when we need them.  Even though we can transpile code from ES6 to ES3/5, this only transforms the syntax.  The actual methods and features available vary from browser to browser, and anything not available must be polyfilled.  If we wish to use ES6 promises, we need to use a polyfill to add support for Internet Explorer.
 
 For example, if we wrote the following code:
 
