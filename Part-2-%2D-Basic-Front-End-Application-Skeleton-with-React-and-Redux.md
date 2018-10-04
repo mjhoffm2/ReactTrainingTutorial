@@ -1,6 +1,5 @@
 [[_TOC_]]
 
-
 ## Overview
 
 This part of the tutorial is continued from [Part 1 - Achieving 'Hello World'](/Part-1-%2D-Achieving-'Hello-World').
@@ -263,7 +262,7 @@ Alternatively, another common approach is to simply do the following:
 
 In this example, we have simply declared that we expect the user's browser to have full es6 support.  This is of course not going to be the case, but the idea is that we will polyfill whatever es6 methods and features we need without needing to provide a separate type definition for them.  TypeScript will simply pull those definitions from the built-in es6 type library.  The downside is that TypeScript will not show an error if you forget to polyfill something.
 
-## Redux
+# Redux
 
 ### Introduction
 This is not a comprehensive tutorial for using Redux, but I will explain some of the basics.  For more information, you should read the official documentation: https://redux.js.org/
@@ -441,7 +440,7 @@ const store = createStore(rootReducer);
 
 This creates our store using our reducer, which is now ready for use.  If we want, we can manually dispatch actions to the store using `store.dispatch( ... )`, and get the current state using `store.getState()`.  We can also subscribe to changes using `store.subscribe( ... )` and update the reducer using `store.replaceReducer( ... )`.  However, we will not be calling any of these directly.  Instead we will use the React-Redux library to manage all of these for us, among other things.
 
-## React-Redux
+# React-Redux
 
 ### Overview
 
@@ -624,6 +623,7 @@ import 'es6-promise/auto';
 ```
 This makes promises available to the user's browser, if it wasn't already.
 
+### Final Connected Component
 
 Putting everything together, our component now looks like this:
 
@@ -722,7 +722,7 @@ export const ChannelList: React.ComponentClass<params> =
     connect(mapStateToProps, mapDispatchToProps)(ChannelListComponent);
 
 ```
-The `connect()` method returns a function that we can pass our `ChannelListComponent` to, creating a new 'higher-order' component called `ChannelList`.  This component can then be exported and used elsewhere in the application.  This higher-order component will automatically get the props it needs from the Redux store, so they don't need to be provided by a parent component.  In the case of this component, there are no props at all to be provided by the parent component, as defined in the `params` interface.  We update our `AppRoot` component to use our new `ChannelList` higher-order component.
+The `connect()` method returns a function that we can pass our `ChannelListComponent` to, creating a new 'higher-order' component called `ChannelList`.  This component can then be exported and used elsewhere in the application.  This higher-order component will automatically get the props it needs from the Redux store, so they don't need to be provided by a parent component.  In the case of this component, there are no props at all to be provided by the parent component, as defined in the `params` interface.  We can update our `AppRoot` component to use our new `ChannelList` higher-order component.
 
 _AppRoot.tsx_
 ```ts
