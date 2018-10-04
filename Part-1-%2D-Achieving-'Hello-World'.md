@@ -92,7 +92,7 @@ _tsconfig.json_
 }
 ```
 
-One important thing that this tsconfig is doing is defining how modules are going to be hooked up.  By default, the TypeScript compiler will output CommonJS modules.  While these will work just fine, they prevent webpack from performing important tree-shaking optimizations.  Therefore, it is important to make sure that ES6 modules are used instead.  If you want to target es3 or es5 instead of es6+ with the TypeScript compiler, then you should add `"module": "es6"` to the compiler options to ensure that ES6 modules are used.
+One important thing that this tsconfig is doing is defining how modules are going to be hooked up.  By default, the TypeScript compiler will output CommonJS modules.  While these will work just fine, they prevent webpack from performing important tree-shaking optimizations.  Therefore, it is important to make sure that ES6 modules are used instead.  ES6 modules are used by default when ES6+ is set as the target, but in this case we are using the default ES3 target for the TypeScript compiler.
 
 We will be invoking the TypeScript compiler as a part of our webpack build process, so we don't need to use it to transpile down to browser-compatible code yet.
 
