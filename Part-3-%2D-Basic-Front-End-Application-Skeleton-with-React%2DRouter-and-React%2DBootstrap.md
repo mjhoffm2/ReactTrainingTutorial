@@ -454,8 +454,14 @@ export interface State {
 
 We will also need to update the way our store is created 
 
-## React-Bootstrap
+# React-Bootstrap
 
 ### Examples
 
 ### Including Bootstrap CSS
+
+# Putting everything together
+
+## What it should look like
+
+## Download Source
