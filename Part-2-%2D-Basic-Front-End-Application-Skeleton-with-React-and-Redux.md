@@ -590,4 +590,188 @@ ReactDOM.render(
 
 ## Polyfills
 
-Even though we can transpile code from ES6 to ES3/5, this only transforms the syntax.  The actual methods and features available vary from browser to browser, and must be polyfilled.  If we wish to use ES6 promises, we need to use a polyfill to add support for Internet Explorer.
+### Overview
+
+Even though we can transpile code from ES6 to ES3/5, this only transforms the syntax.  The actual methods and features available vary from browser to browser, and anything not available must be polyfilled.  If we wish to use ES6 promises, we need to use a polyfill to add support for Internet Explorer.
+
+For example, if we wrote the following code:
+
+```ts
+const myFunction = () => Promise.Resolve(null);
+```
+
+When targeting es3/5, this might be transpiled into the following:
+
+```js
+var myFunction = function() { return Promise.Resolve(null); };
+```
+
+While transpilation can turn `const` into `var` and arrow functions into regular functions, it will leave things like `Promise.Resolve( ... )` unchanged.
+
+### Example
+
+In our `tsconfig.json`, we declare what libraries we expect to be available in the user's browser.  This will cause TypeScript to throw an error whenever we use a feature that is not part of those libraries.  Take the following `tsconfig.json` file for example:
+
+_tsconfig.json_
+```ts
+{
+  "compilerOptions": {
+    //Use strict type checking
+    //This makes it so 'null' and 'undefined' are considered explicit values
+    //It shows type errors where types could not be inferred, among other things
+    "strict": true,
+
+    //Transforms react JSX syntax into React.createElement() calls
+    "jsx": "react",
+
+    //Tell the TypeScript compiler what libraries we expect to exist
+    //In this case, we expect the user's browser to have ES5 support and a dom
+    //We provide a polyfill for es2015 promises, and other polyfills provide their own definitions
+    //Another common approach is to simply declare that the user's browser has es6 support, and then polyfill anything necessary
+    "lib": ["es5", "dom", "es2015.promise"],
+
+    //By declaring the target to be ES6, this sets the compilation target for the typescript compiler.
+    //We don't need this to compile all the way down to ES3/5, webpack will handle that.
+    //In addition to setting the compilation target, this also causes ES6 modules to be used instead of CommonJS
+    //This is important since it enables webpack to do tree shaking optimizations (dead code removal)
+    "target": "es6",
+
+    //When setting "module": "es6", the typescript compiler defaults to the "classic" module resolution strategy
+    //It is important that we use the "node" module resolution strategy instead
+    "moduleResolution": "node"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
+```
+In the above code, we have declared that we expect the user's browser to support `es5`, `dom` and `es2015.promise`.  Since not all browsers actually support promises, we will need to provide a polyfill for it if we want our application to work on those browsers.
+
+To do this, we will add the following in the entry point of our application:
+
+```ts
+import 'es6-promise/auto';
+```
+This library will automatically polyfill promises into the user's browser, if necessary.
+
+### Type-Safe Polyfills
+
+If we want to use other features from ES6 such as `Array.prototypes.find( ... )`, then we will need to polyfill that as well.  However, there isn't a `lib` option specific to this `find` method, so we will also need to provide our own type definition for it.
+
+_polyfills.js_
+```js
+//polyfill for array.find
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
+// https://tc39.github.io/ecma262/#sec-array.prototype.find
+if (!Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+        value: function(predicate) {
+            // 1. Let O be ? ToObject(this value).
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+
+            var o = Object(this);
+
+            // 2. Let len be ? ToLength(? Get(O, "length")).
+            var len = o.length >>> 0;
+
+            // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+
+            // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+            var thisArg = arguments[1];
+
+            // 5. Let k be 0.
+            var k = 0;
+
+            // 6. Repeat, while k < len
+            while (k < len) {
+                // a. Let Pk be ! ToString(k).
+                // b. Let kValue be ? Get(O, Pk).
+                // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+                // d. If testResult is true, return kValue.
+                var kValue = o[k];
+                if (predicate.call(thisArg, kValue, k, o)) {
+                    return kValue;
+                }
+                // e. Increase k by 1.
+                k++;
+            }
+
+            // 7. Return undefined.
+            return undefined;
+        },
+        configurable: true,
+        writable: true
+    });
+}
+```
+
+_polyfills.d.ts_
+```ts
+interface Array<T> {
+    /**
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise.
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined.
+     * @param thisArg If provided, it will be used as the this value for each invocation of
+     * predicate. If it is not provided, undefined is used instead.
+     */
+    find<S extends T>(predicate: (this: void, value: T, index: number, obj: T[]) => value is S, thisArg?: any): S | undefined;
+
+    find(predicate: (value: T, index: number, obj: T[]) => boolean, thisArg?: any): T | undefined;
+}
+
+```
+
+Then we import the polyfills in the entry point of our application:
+
+```ts
+import './util/polyfills';
+```
+
+From this point on, we have access to the `.find( ... )` method on our arrays wherever we use them.
+
+### Non-Type-Safe Polyfills
+
+Alternatively, another common approach is to simply do the following:
+
+```ts
+{
+  "compilerOptions": {
+    //Use strict type checking
+    //This makes it so 'null' and 'undefined' are considered explicit values
+    //It shows type errors where types could not be inferred, among other things
+    "strict": true,
+
+    //Transforms react JSX syntax into React.createElement() calls
+    "jsx": "react",
+
+    //Tell the TypeScript compiler what libraries we expect to exist
+    //In this case, we expect the user's browser to have ES6 support (haha) and a dom
+    //The idea is that we will polyfill anything additional that we use from es6 without needing our own type definitions for them
+    "lib": ["es6", "dom"]
+
+    //By declaring the target to be ES6, this sets the compilation target for the typescript compiler.
+    //We don't need this to compile all the way down to ES3/5, webpack will handle that.
+    //In addition to setting the compilation target, this also causes ES6 modules to be used instead of CommonJS
+    //This is important since it enables webpack to do tree shaking optimizations (dead code removal)
+    "target": "es6",
+
+    //When setting "module": "es6", the typescript compiler defaults to the "classic" module resolution strategy
+    //It is important that we use the "node" module resolution strategy instead
+    "moduleResolution": "node"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
+
+```
+
+In this example, we have simply declared that we expect the user's browser to have full es6 support.  This is of course not going to be the case, but the idea is that we will polyfill whatever es6 methods and features we need without needing to provide a separate type definition for them.  TypeScript will simply pull those definitions from the built-in es6 type library.  The downside is that TypeScript will not show an error if you forget to polyfill something.
