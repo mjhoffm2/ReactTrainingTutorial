@@ -797,7 +797,7 @@ ReactDOM.render(
 );
 ```
 
-## Putting Everything Together
+# Putting Everything Together
 
 ### File Structure
 
@@ -870,3 +870,7 @@ Listening on port 3000
 ### What our final application should look like
 ![image.png](/.attachments/image-d71d39fd-2b5f-4935-9c21-a8097e2cc436.png)
 
+
+
+### Download Source
+The complete code for this part of the tutorial can be found here: https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-2
