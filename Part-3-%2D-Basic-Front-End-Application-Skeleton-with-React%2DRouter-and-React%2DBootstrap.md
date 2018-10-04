@@ -43,6 +43,7 @@ export const Routes = () =>
 
 ```
 ![image.png](/.attachments/image-d66576cd-9125-45a0-a402-bcd3818bbd50.png)
+Disregard the `ViewChannel.tsx` file for now.
 
 The `Routes` component above defines some rules for how urls will be matched to react components.  In this case, we have set up the `Home` component to be rendered when the url path is exactly `/`.  Next, we have set up the `ChannelList` component to be rendered when the url path starts with `/channels`.  Finally, any routes that did not match will be redirected to `/`.
 
@@ -204,6 +205,212 @@ _main.html_
 ```
 
 With these fixes applied, we should find that our application is working as intended when a user tries to directly request a sub-page.
+
+### Creating a Nested Route
+
+Right now, all of the routes in our application are handled by the `Routes` component.  However, we can have routes distributed throughout our component tree.  For example, our `/channels` route does not have the `exact` prop.  This means that it will render the `ChannelList` component as long as the url _starts_ with `/channels`.  We can have longer urls with more path parameters which can then in turn be handled by the `ChannelList` component.
+
+Let's create a new component which represents an individual channel.
+
+_ViewChannel.tsx_
+```ts
+import * as React from 'react';
+import * as defs from '../definitions/definitions';
+import {RouteComponentProps} from "react-router";
+import {Dispatch} from "redux";
+import {Action} from "../actions/actionTypes";
+import {connect} from "react-redux";
+import {Link} from "react-router-dom";
+
+interface urlParams {
+    channelId: string;
+}
+
+interface params extends RouteComponentProps<urlParams> {}
+
+interface connectedState {
+    channel: defs.Channel | null;
+}
+
+interface connectedDispatch {
+
+}
+
+const mapStateToProps = (state: defs.State, ownProps: params): connectedState => {
+    //select the specific channel from redux matching the channelId route parameter
+    if(state.channels) {
+        const channelId = parseInt(ownProps.match.params.channelId);
+
+        //Note: Array.prototype.find( ... ) requires a polyfill for internet explorer
+        const channel = state.channels.find(channel => channel.channelId === channelId);
+
+        if(channel) {
+            return {
+                channel
+            };
+        }
+    }
+
+    return {
+        channel: null
+    };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch<Action>): connectedDispatch => ({
+
+});
+
+type fullParams = params & connectedState & connectedDispatch;
+
+interface localState {}
+
+class ViewChannelComponent extends React.Component<fullParams, localState> {
+    render() {
+        return (
+            <div>
+                <div>
+                    Channel Id: {this.props.match.params.channelId}
+                </div>
+                <div>
+                    {
+                        this.props.channel ?
+                            <div>Channel Name: {this.props.channel.displayName}</div> :
+                            <div>Loading...</div>
+                    }
+                    <Link to='/channels'>
+                        Close
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+}
+
+export const ViewChannel: React.ComponentClass<params> =
+    connect(mapStateToProps, mapDispatchToProps)(ViewChannelComponent);
+
+```
+
+In the above code, we have defined a component which expects to receive a url parameter called `channelId`.  If we define a route that looks like
+```ts
+<Route path={`/channels/:channelId/view`} component={ViewChannel}/>
+```
+Then when the ViewChannel component, is rendered, the section of the url which matched `:channelId` will be assigned to `props.match.params.channelId`.  Note that even if we navigate to a url like `/channels/3/view`, the url parameter will be the string `"3"`, not the number `3`.
+
+Let's update the `ChannelList` component to make use of this new component:
+
+_Channels.tsx_
+```ts
+import * as React from 'react';
+import * as defs from '../definitions/definitions';
+import {Route, RouteComponentProps, Switch} from "react-router";
+import {Dispatch} from "redux";
+import {Action, ActionTypes} from "../actions/actionTypes";
+import {connect} from "react-redux";
+import {ViewChannel} from "./ViewChannel";
+import {Link} from "react-router-dom";
+
+interface urlParams {
+    channelId: string;
+}
+
+interface params extends RouteComponentProps<urlParams> {}
+
+interface connectedState {
+    channels: defs.Channel[] | null;
+}
+
+interface connectedDispatch {
+    reloadChannels: () => Promise<void>;
+}
+
+const mapStateToProps = (state: defs.State): connectedState => ({
+    channels: state.channels
+});
+
+const mapDispatchToProps = (dispatch: Dispatch<Action>): connectedDispatch => ({
+    reloadChannels: async () => {
+        //TODO: load data from server
+
+        dispatch({
+            type: ActionTypes.LOAD_CHANNELS,
+            channels: [{
+                channelId: 1,
+                displayName: "General",
+                canAnyoneInvite: true,
+                isActiveDirectMessage: false,
+                isGeneral: true,
+                isPublic: true,
+                ownerId: null
+            }, {
+                channelId: 2,
+                displayName: "Random",
+                canAnyoneInvite: true,
+                isActiveDirectMessage: false,
+                isGeneral: false,
+                isPublic: true,
+                ownerId: 1
+            }, {
+                channelId: 3,
+                displayName: "Secret",
+                canAnyoneInvite: false,
+                isActiveDirectMessage: false,
+                isGeneral: false,
+                isPublic: false,
+                ownerId: 1
+            }]
+        });
+    }
+});
+
+type fullParams = params & connectedState & connectedDispatch;
+
+interface localState {}
+
+class ChannelListComponent extends React.Component<fullParams, localState> {
+
+    componentDidMount() {
+        this.props.reloadChannels();
+    }
+
+    render() {
+        return (
+            <div>
+                <div>
+                    <h3>
+                        Available Channels
+                    </h3>
+                </div>
+                <div>
+                    {
+                        this.props.channels ?
+                            this.props.channels.map(channel =>
+                                <div key={channel.channelId}>
+                                    {channel.displayName}
+                                </div>
+                            ) :
+                            "Loading..."
+                    }
+                </div>
+                <Switch>
+                    <Route path={`${this.props.match.url}/:channelId/view`} component={ViewChannel}/>
+                    <Route
+                        render={() =>
+                            <div>Please select a Channel</div>
+                        }
+                    />
+                </Switch>
+                <Link to='/'>
+                    Return to home
+                </Link>
+            </div>
+        );
+    }
+}
+
+export const ChannelList: React.ComponentClass<params> =
+    connect(mapStateToProps, mapDispatchToProps)(ChannelListComponent);
+```
 
 ## Connected-React-Router
 
