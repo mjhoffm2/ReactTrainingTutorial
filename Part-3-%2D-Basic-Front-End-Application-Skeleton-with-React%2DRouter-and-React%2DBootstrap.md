@@ -297,7 +297,7 @@ In the above code, we have defined a component which expects to receive a url pa
 ```
 Then when the ViewChannel component, is rendered, the section of the url which matched `:channelId` will be assigned to `props.match.params.channelId`.  Note that even if we navigate to a url like `/channels/3/view`, the url parameter will be the string `"3"`, not the number `3`.
 
-The `ViewChannel` component will use the `channelId` url parameter to select a specific channel from the Redux store.  It would be more efficient if we stored the channels in the Redux store as a map instead of an array, but this isn't an issue for our small application.
+In the `mapStateToProps` method, the `ViewChannel` component uses the `channelId` url parameter to select a specific channel from the Redux store.  It would be more efficient if we stored the channels in the Redux store as a map instead of an array, but this isn't an issue for our small application.
 
 We also have included a link which changes the url to `/channels`.  This has the effect of removing the part of the url which caused this component to be rendered, resulting in this component being removed.
 
