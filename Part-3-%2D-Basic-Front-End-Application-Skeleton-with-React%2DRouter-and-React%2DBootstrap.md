@@ -23,9 +23,11 @@ All of the dependencies that we need for this part of the tutorial were included
 
 React makes it easy to create complex applications with many different views and components without having the user perform any actual page navigation.  This is usually referred to as a Single Page Application (SPA).  React-Router is a library to help manage navigation within a single page application, and ties it together with the actual browser url.  This allows us to keep the display of our application in sync with the url in the browser, which is a big win in terms of user experience.
 
+For more information about React-Router, you should read the official documentation: https://reacttraining.com/react-router/web
+
 ### Set up our Routes
 
-We are going to set up a new root component for out application.  As a result, I am renaming the current `AppRoot` component to be the `Home` component.  The new root component will be located at `src/web/routes.tsx`.
+We are going to set up a new root component for our application.  As a result, I am renaming the current `AppRoot` component to be the `Home` component.  The new root component will be located at `src/web/routes.tsx`.
 
 _routes.tsx_
 ```ts
@@ -46,6 +48,11 @@ export const Routes = () =>
 Disregard the `ViewChannel.tsx` file for now.
 
 The `Routes` component above defines some rules for how urls will be matched to react components.  In this case, we have set up the `Home` component to be rendered when the url path is exactly `/`.  Next, we have set up the `ChannelList` component to be rendered when the url path starts with `/channels`.  Finally, any routes that did not match will be redirected to `/`.
+
+Relevant Documentation
+ - Route Component - https://reacttraining.com/react-router/web/api/Route
+ - Switch Component - https://reacttraining.com/react-router/web/api/Switch
+ - Redirect Component - https://reacttraining.com/react-router/web/api/Redirect
 
 In addition to renaming `AppRoot` to `Home`, we will also be updating the component to contain a link to `/channels` instead of rendering the `ChannelList` component directly.
 
@@ -295,7 +302,7 @@ In the above code, we have defined a component which expects to receive a url pa
 ```ts
 <Route path={`/channels/:channelId/view`} component={ViewChannel}/>
 ```
-Then when the ViewChannel component, is rendered, the section of the url which matched `:channelId` will be assigned to `props.match.params.channelId`.  Note that even if we navigate to a url like `/channels/3/view`, the url parameter will be the string `"3"`, not the number `3`.
+Then when the ViewChannel component, is rendered, the section of the url which matches `:channelId` will be assigned to `props.match.params.channelId`.  Note that even if we navigate to a url like `/channels/3/view`, the url parameter will be the string `"3"`, not the number `3`.
 
 In the `mapStateToProps` method, the `ViewChannel` component uses the `channelId` url parameter to select a specific channel from the Redux store.  It would be more efficient if we stored the channels in the Redux store as a map instead of an array, but this isn't an issue for our small application.
 
@@ -420,7 +427,7 @@ export const ChannelList: React.ComponentClass<params> =
 
 The major additions to this component are:
 1. We have included a new set of routes below the list of channels.  When the url matches the `${this.props.match.url}/:channelId/view` path, then the ViewChannel component will be rendered on the page.  Otherwise, it will default to rendering a div that says 'Please select a Channel'.
-2. Each channel is now displayed as a link to open that channel.
+2. Each channel in the list is now displayed as a link to open that channel.
 3. We have added a link to change the url to `/`.  This has the effect of unmounting the `ChannelList` component, and mounting the `Home` component instead.
 
 We can rebuild and re-run the server to take a look at what this looks like so far:
@@ -638,10 +645,16 @@ Now, we can call things like `this.props.dispatch('/some/url/3/view');` from any
 # React-Bootstrap
 
 ### Overview
+
+React-Bootstrap will be used to generate most of the actual DOM elements that the user sees.  It has a lot of useful components for organizing the layout of our application, as well as individual inputs, buttons, and more.  The best way to get an understanding of what you can do with React-Bootstrap is to look through the examples in their documentation.
+
 https://react-bootstrap.github.io/getting-started/introduction
+
+To practice React-Bootstrap, you can go ahead and test out various styles and components in the application.  I will apply some arbitrary styling to our application using React-Bootstrap to give an idea on what you can do with it.
 
 ### Examples
 
+#### Home
 _Home.tsx_
 ```ts
 import * as React from "react";
@@ -675,6 +688,12 @@ export class Home extends React.Component<{}> {
     }
 }
 ```
+
+This will render a Panel on the left half of the screen, and some text on the right half of the screen.  See the bottom of the page for an image of what this should look like.
+
+In this component, I have put a `<Grid />` component near the root of the dom.  In React-Bootstrap, you can have `<Row />` components and `<Col />` components nested within each other to create a nested grid effect, but you should not place a `<Grid />` inside of another `<Grid />`.
+
+#### Channels
 
 _Channels.tsx_
 ```ts
@@ -807,7 +826,9 @@ export const ChannelList: React.ComponentClass<params> =
     connect(mapStateToProps, mapDispatchToProps)(ChannelListComponent);
 ```
 
-_ViewChannel.tsx
+#### ViewChannel
+
+_ViewChannel.tsx_
 ```ts
 import * as React from 'react';
 import * as defs from '../definitions/definitions';
@@ -903,14 +924,54 @@ export const ViewChannel: React.ComponentClass<params> =
 
 ### Including Bootstrap CSS
 
+React-Bootstrap does not include its own styling.  Instead, it requires Bootstrap version 3.3.7 as a peer dependency.  Only the css stylesheet is needed, the JavaScript used by Bootstrap is completely re-implemented in React-Bootstrap.
+
+To add the css we need, we will need to make changes to our `boot-client.tsx` file, and our `webpack.config.js` file.
+
+First, simply import the css file directly from bootstrap.
+
 _boot-client.tsx_
 ```ts
 import 'bootstrap/dist/css/bootstrap.css'
 ```
 
+We already have rules in webpack which tells it how to handle the css.  In this case, the bootstrap stylesheet will be put in the JavaScript bundle as a string.  This is not great for the size of our bundle, but that is something we can deal with later.  However, the bootstrap css references some static files that we do not have rules configured in webpack to handle.  We will add a rule targeting images and fonts using the `url-loader`.  This loader will include these resources directly in our JavaScript bundle as a base 64 string.  We can also provide a `limit` parameter, which limits how large a resource can be before it won't be included in the bundle.  In this case, any images or fonts which are larger than 25 kb will be kept as separate files and output into to the `public/build` folder.
+
+```js
+        ...
+        module: {
+            rules: [
+                ...
+                {
+                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf|woff|woff2|eot)$/,
+                    loader: 'url-loader?limit=25000'
+                }
+            ]
+        }
+        ...
+```
+
+Add the rule to use the `url-loader` with limit 25000 to the web part of the webpack.config.js (not server).
+
+The final `webpack.config.json` should look like this:
+
 _webpack.config.js_
 ```js
-...
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
+
+var config = [
+    //web configuration
+    {
+        entry: ['./src/web/boot-client.tsx'],
+        output: {
+            path: path.resolve(__dirname, './public/build'),
+            filename: 'bundle.js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
         module: {
             rules: [
                 {
@@ -921,14 +982,46 @@ _webpack.config.js_
                     test:/\.tsx?$/,
                     include: path.resolve(__dirname, "./src/web/"),
                     loader: "awesome-typescript-loader"
-                },
-                {
-                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf|woff|woff2|eot)$/,
-                    loader: 'url-loader?limit=25000'
                 }
             ]
+        },
+        devtool: "source-map"
+    },
+
+    //server configuration
+    {
+        entry: ['./src/server/main.ts'],
+        target: 'node',
+
+        //make sure that webpack doesn't waste time compiling and bundling code that is already available in node
+        externals: [nodeExternals()],
+
+        output: {
+            path: path.resolve(__dirname, './build'),
+            filename: '[name].js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/server/"),
+                    loader: "awesome-typescript-loader"
+                }
+            ]
+        },
+
+        //by default, webpack will set these to '/', so override that behavior on the server
+        node: {
+            __dirname: false,
+            __filename: false
         }
-...
+    }
+];
+module.exports = config;
 ```
 
 
@@ -946,10 +1039,13 @@ npm run host
 
 ## What it should look like
 
+### Home
 ![image.png](/.attachments/image-ac8ecac5-93fe-4e7e-996e-1e91a7bdbe3c.png)
 
+### Channels
 ![image.png](/.attachments/image-9bade8f5-e4e2-4295-a17b-87fefde868af.png)
 
+### ViewChannel
 ![image.png](/.attachments/image-1ad3cc4d-6d2d-49aa-8bba-e003a519b110.png)
 
 ## Download Source
