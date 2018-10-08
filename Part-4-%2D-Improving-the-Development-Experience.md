@@ -629,6 +629,7 @@ export class Counter extends React.Component<params, localState> {
     }
 }
 ```
+![image.png](/.attachments/image-77be6521-0819-4353-be22-df1952c3591b.png)
 
 We will update `Home.tsx` to import and use the new `Counter.tsx` component:
 
@@ -690,3 +691,6 @@ This script will first build only the server code, then it will run the server i
 
 The dev middleware also has an option to output the code it builds to disc.  However, this will also cause the hot-update files to be written to disc as well, so I would not recommend it.  Just keep in mind that your bundle file on disc may be out of date.
 
+## Download Source
+
+https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-4
