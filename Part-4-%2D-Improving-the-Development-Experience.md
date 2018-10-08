@@ -535,7 +535,7 @@ export const Routes = hot(module)(() =>
 );
 ```
 
-Next, we update boot-client.tsx, essentially reverting it to what we had before we added hot module replacement.
+Next, we update boot-client.tsx, reverting it to what we had before we added hot module replacement.
 
 _boot-client.tsx_
 ```ts
@@ -581,7 +581,9 @@ ReactDOM.render(
     document.getElementById('root')
 );
 ```
-As you may be able to tell, the `hot(module)( ... );` approach is more streamlined and handles a lot of the hard stuff for us.  However, it also takes a more opinionated approach at the build process and how we are doing hot module reloading.  We are now dependent on `babel-loader`, which `awesome-typescript-loader` uses internally.  If we want to hot reload something outside of our react components, we will need to configure that separately.  We also lose flexibility with how react components are hot reloaded.  In particular, it is helpful to be able to configure the hot reloader to skip an update with compilation errors.  This is done by default with the way we had configured hot module reloading previously.  The default behavior for react-hot-loader is to accept errored modules anyway, which will then cause the module to become 'unaccepted' and no longer hot reload until the page is refreshed.  I could not figure out a way to address this.
+As you may be able to tell, the `hot(module)( ... );` approach is more streamlined and handles a lot of the hard stuff for us.  However, it also takes a more opinionated approach at the build process and how we are doing hot module reloading.  We are now dependent on `babel-loader`, which `awesome-typescript-loader` uses internally.  If we want to hot reload something outside of our react components, we will need to configure that separately.
+
+We also lose flexibility with how react components are hot reloaded.  In particular, it is helpful to be able to configure the hot reloader to skip an update with compilation errors.  This is done by default with the way we had configured hot module reloading previously.  The default behavior for react-hot-loader's `hot(module)( ... )` api is to accept errored modules anyway, which will then cause the module to become 'unaccepted' and no longer hot reload until the page is refreshed.  I could not figure out a way to address this.  In theory you should be able to exert more control using the `<AppContainer />` component, but I was not able to get that to correctly preserve the state of the React components.
 
 Whichever way we do it, we still need to have the hot module replacement plugin in webpack, as well as the `webpack-hot-middleware/client` entry point.
 
