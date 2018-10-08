@@ -11,6 +11,7 @@ Primary Technologies
  - Webpack
  - Webpack dev middleware
  - Webpack hot module replacement
+ - React Hot Loader
 
 ## Update existing configuration
 
@@ -191,6 +192,7 @@ _package.json_
     "react": "^16.5.0",
     "react-bootstrap": "^0.32.4",
     "react-dom": "^16.5.0",
+    "react-hot-loader": "^4.3.11",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
@@ -493,3 +495,196 @@ var config = [
 ];
 module.exports = config;
 ```
+
+### Try it out
+
+At this point, you can try out hot module reloading.  Start your server with the usual `npm run build` and `npm run host` and navigate to http://localhost:3000 to start the application.  Then make some sort of change to one of the components of the application, such as changing the text in the `Home` component.   When you save your changes to disc, you should see it updated within a few seconds.
+
+![image.png](/.attachments/image-43298dcf-0600-4bdd-ae4d-b5d0c12eb274.png)
+
+If you make a change that cannot be compiled, you will see an overlay with errors:
+
+![image.png](/.attachments/image-c2459aa4-d82b-4ceb-b18b-d28fe357105f.png)
+
+
+## Hot Reloading and React State
+
+### Overview
+Due to the way we decided to handle hot reloading, react components are remounted when they are hot-reloaded.  This means that the component's state will be reset when a hot reload happens.  However, the Redux store will persist.  If you wish to also preserve the state of react components, then you can use [react-hot-loader](https://github.com/gaearon/react-hot-loader) to do this.  The downside is that the react-hot-loader removes some of the current flexibility that we have in our build process.
+
+### Setup
+
+Setting this up is very simple. All we should need to do is go to `boot-client.tsx` and wrap the part we want to hot reload in an `<AppContainer />` element.  However, after messing with this for a while I could not get this to preserve any component state.  Anyway, as of `react-hot-loader` v4, it is recommended to use the new `hot(module)( ... )` api instead of the `<AppContainer />` component, which requires much less configuration
+
+First, we go to the root component that we want to hot-reload, in this case the `Routes` component in `routes.tsx`, and we wrap the export in a `hot(module)( ... );` call.
+
+_routes.tsx_
+```ts
+import * as React from 'react';
+import {Route, Switch, Redirect} from 'react-router';
+import {hot} from 'react-hot-loader'
+import {ChannelList} from "./components/Channels";
+import {Home} from "./components/Home";
+
+export const Routes = hot(module)(() =>
+    <Switch>
+        <Route exact path={'/'} component={Home} />
+        <Route path={'/channels'} component={ChannelList} />
+        <Redirect to={'/'}/>
+    </Switch>
+);
+```
+
+Next, we update boot-client.tsx, essentially reverting it to what we had before we added hot module replacement.
+
+_boot-client.tsx_
+```ts
+import * as React from 'react';
+import * as ReactDOM from 'react-dom'
+import createBrowserHistory from "history/createBrowserHistory";
+import {rootReducer} from "./reducers/reducer";
+import {applyMiddleware, compose, createStore} from "redux";
+import {Provider} from 'react-redux';
+import {ConnectedRouter, connectRouter, routerMiddleware} from "connected-react-router";
+import {Routes} from "./routes";
+
+//polyfills for IE
+import './util/polyfills';
+import 'es6-promise/auto';
+
+//styles
+import 'bootstrap/dist/css/bootstrap.css'
+import {AppContainer} from "react-hot-loader";
+
+const message: string = "this is the client";
+console.log(message);
+
+const history = createBrowserHistory();
+
+//configure store based on https://github.com/supasate/connected-react-router
+const store = createStore(
+    connectRouter(history)(rootReducer),
+    compose(
+        applyMiddleware(
+            routerMiddleware(history)
+        ),
+        (window as any).devToolsExtension ? (window as any).devToolsExtension() : (f: any) => f
+    )
+);
+
+ReactDOM.render(
+    <Provider store={store}>
+        <ConnectedRouter history={history}>
+            <Routes />
+        </ConnectedRouter>
+    </Provider>,
+    document.getElementById('root')
+);
+```
+As you may be able to tell, the `hot(module)( ... );` approach is more streamlined and handles a lot of the hard stuff for us.  However, it also takes a more opinionated approach at the build process and how we are doing hot module reloading.  We are now dependent on `babel-loader`, which `awesome-typescript-loader` uses internally.  If we want to hot reload something outside of our react components, we will need to configure that separately.  We also lose flexibility with how react components are hot reloaded.  In particular, it is helpful to be able to configure the hot reloader to skip an update with compilation errors.  This is done by default with the way we had configured hot module reloading previously.  The default behavior for react-hot-loader is to accept errored modules anyway, which will then cause the module to become 'unaccepted' and no longer hot reload until the page is refreshed.  I could not figure out a way to address this.
+
+Whichever way we do it, we still need to have the hot module replacement plugin in webpack, as well as the `webpack-hot-middleware/client` entry point.
+
+### Try it out
+
+To test out hot module replacement while maintaining the state of our react components, we are going to add a new `<Counter />` component to the application, which will be displayed by the `Home` component.
+
+_Counter.tsx_
+```ts
+import * as React from "react";
+import {Row, Col, Button} from "react-bootstrap";
+
+interface params {}
+
+interface localState {
+    count: number;
+}
+
+export class Counter extends React.Component<params, localState> {
+    constructor(p: params) {
+        super(p);
+
+        this.state = {
+            count: 0
+        }
+    }
+
+    render() {
+        return (
+            <Row>
+                <Col xs={6}>
+                    <div>Count: {this.state.count}</div>
+                </Col>
+                <Col xs={6}>
+                    <Button
+                        onClick={e => this.setState({count: this.state.count+1})}
+                    >
+                        Increment
+                    </Button>
+                </Col>
+            </Row>
+        );
+    }
+}
+```
+
+We will update `Home.tsx` to import and use the new `Counter.tsx` component:
+
+_Home.tsx_
+```ts
+import * as React from "react";
+import {Link} from "react-router-dom";
+import {Row, Col, Grid, Panel} from "react-bootstrap";
+import {Counter} from "./Counter";
+
+export class Home extends React.Component<{}> {
+    constructor(p: {}) {
+        super(p);
+    }
+
+    render() {
+        return (
+            <Grid>
+                <Row>
+                    <Col xs={6}>
+                        <Panel>
+                            <Panel.Heading>App Root</Panel.Heading>
+                            <Panel.Body>
+                                <Counter/>
+                            </Panel.Body>
+                            <Panel.Footer>
+                                <Link to='/channels'>Go to channel list</Link>
+                            </Panel.Footer>
+                        </Panel>
+                    </Col>
+                    <Col xs={6}>
+                        Content on right half of screen
+                    </Col>
+                </Row>
+            </Grid>
+        );
+    }
+}
+```
+
+Now, you can build and run the application and try it out for yourself.  Simply increment the counter and then make some kind of change to `Counter.tsx` or `Home.tsx`.  You will see the change get applied while maintaining the current count.
+
+![image.png](/.attachments/image-6b45bf49-90f2-4418-bc10-c5b98052f01d.png)
+
+## Add Better NPM Script
+
+So far, we have been building and running our code using two separate scripts, `npm run build` and `npm run host`.  You may also have noticed that since we enabled the webpack dev middleware that automatically rebuilt our code, it was necessary to wait for the web code to be built a second time after a server restart.  To address these issues, we will be using a new NPM script to both build and run our code for development.
+
+_package.json_
+```json
+{
+  "scripts": {
+    "dev": "node_modules/.bin/webpack --mode=development --config-name=server & node ./build/main.js --mode=development"
+  }
+}
+```
+
+This script will first build only the server code, then it will run the server in development mode.  The server will then automatically build the web code as a part of the webpack dev middleware.  Please note that as a result, the web bundle that is built will never be output to disc in development mode.  You can manually run `npm run build` to output the web bundle.
+
+The dev middleware also has an option to output the code it builds to disc.  However, this will also cause the hot-update files to be written to disc as well, so I would not recommend it.  Just keep in mind that your bundle file on disc may be out of date.
+
