@@ -695,6 +695,47 @@ This script will first build only the server code, then it will run the server i
 
 The dev middleware also has an option to output the code it builds to disc.  However, this will also cause the hot-update files to be written to disc as well, so I would not recommend it.  Just keep in mind that your bundle file on disc may be out of date.
 
+## Hot Reloading CSS
+
+### Overview
+
+If you have already configured part of your application to hot reload using either webpack-hot-middleware or react-hot-loader, then you already support hot reloading css.  All you need to do is make sure you are using `style-loader` to handle css (or less/scss), and any updates to your styles will be automatically reloaded.  You also have to make sure you are importing them through javascript, and not just adding the stylesheet directly to your html bundle.  You don't even need to import the css in a module being hot reloaded, so you can import directly in `boot-client.tsx` if you wish.
+
+### CSS Extracting Plugins
+
+While it is recommended to use a plugin like [Extract Text Plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) or [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin) to separate your css code from your JavaScript bundle in production, this will prevent your css from being hot reloaded.  In some cases, this might cause other issues when hot reloading non-css resources.  You should set up your webpack config so that these plugins are only used during production.
+
+### Try it out
+
+To test out reloading css, we are going to create a new file called `Counter.css` and place it in a new folder called `styles`.
+
+_Counter.css_
+```css
+.my-counter {
+    color: blue;
+    padding-top: 6px;
+}
+```
+![image.png](/.attachments/image-e277aecd-af3e-412c-a573-2de2ff5839a3.png)
+
+In `Counter.tsx`, we are going to simply add a line to import it:
+
+`import '../styles/Counter.css';`
+
+Then we are going to add a `className` property to the div containing the 'Counter: ...' text.
+
+`<div className={'my-counter'}>Counter: {this.state.count}</div>`
+
+Now we can go ahead and run the demo, and you will see that the 'Counter: ...' text is now blue and better centered vertically.
+
+![image.png](/.attachments/image-d4ac532c-f0ee-49ae-86e5-5535f28da1cb.png)
+
+We can edit the properties of the `my-counter` style and have them immediately reload.  For example, we can change the text color from `blue` to `red`:
+
+![image.png](/.attachments/image-dcfce9d4-2720-4052-8ab8-c758794636ce.png)
+
+You will see the text turn red, without reloading the component itself.
+
 ## Download Source
 
 https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-4
