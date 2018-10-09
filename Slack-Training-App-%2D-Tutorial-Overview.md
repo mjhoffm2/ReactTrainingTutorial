@@ -68,15 +68,18 @@ Although a user may be connected to many channels at once, they will only use on
  - Email
  - Status
  - Description
+ - IsSoftDeleted (boolean)
 
 ### Channel
  - ChannelId (Primary Key)
  - Owner (Optional, Foreign Key)
  - Display Name
+ - Description
  - IsPublic (boolean)
  - CanAnyoneInvite (boolean)
  - IsGeneral (boolean) - Is this channel the special 'general' channel
  - IsActiveDirectMessage (boolean) - Is this channel a direct message channel between two users (neither of which have 'left').
+ - IsSoftDeleted (boolean)
 
 ### Message
  - MessageId (Primary Key)
