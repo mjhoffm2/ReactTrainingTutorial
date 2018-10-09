@@ -400,7 +400,9 @@ if(module.hot) {
 }
 ```
 
-The major changes include the small refactor so that there is a render method which takes a rootContainer (our `<Routes />` component) which will call `ReactDom.render( ... )`, and the addition of the last 6 lines, which configure hot module reloading.  In this case, the code will allow changes to the `'./routes'` resource to be hot reloaded, and will reload them by calling our new render method with an updated Routes component.  Please note that the dynamic require statement is necessary here, since that resource will have been changed.  If you try to simply render the Routes class that has already been imported, it will be out of date.
+The major changes include the small refactor so that there is a render method which takes a rootContainer (our `<Routes />` component) which will call `ReactDom.render( ... )`, and the addition of the last 6 lines, which configure hot module reloading.  In this case, the code will allow changes to the `'./routes'` resource to be hot reloaded, and will reload them by calling our new render method with an updated Routes component.
+
+Please note the dynamic require statement.  If you are following the tutorial exactly, this require statement is not actually necessary due to the way ES6 Harmony Modules work.  However, in all other cases it is necessary since that resource will have been changed.  If you try to simply render the Routes class that has already been imported, it will be out of date.  If you are unsure, you can simply include it and it will work either way.
 
 #### Update 'Web' Webpack config
 
@@ -512,9 +514,11 @@ If you make a change that cannot be compiled, you will see an overlay with error
 ### Overview
 Due to the way we decided to handle hot reloading, react components are remounted when they are hot-reloaded.  This means that the component's state will be reset when a hot reload happens.  However, the Redux store will persist.  If you wish to also preserve the state of react components, then you can use [react-hot-loader](https://github.com/gaearon/react-hot-loader) to do this.  The downside is that the react-hot-loader removes some of the current flexibility that we have in our build process.
 
+Additionally, while react-hot-reloader works in 99% of cases, it is possible to create valid react components that cannot be properly reloaded by react-hot-reloader.  Supporting react-hot-loader imposes some limitations on the way components can be defined.  See https://github.com/gaearon/react-hot-loader/issues/1024 for more details.
+
 ### Setup
 
-Setting this up is very simple. All we should need to do is go to `boot-client.tsx` and wrap the part we want to hot reload in an `<AppContainer />` element.  However, after messing with this for a while I could not get this to preserve any component state.  Anyway, as of `react-hot-loader` v4, it is recommended to use the new `hot(module)( ... )` api instead of the `<AppContainer />` component, which requires much less configuration
+Setting this up is very simple. All we should need to do is go to `boot-client.tsx` and wrap the part we want to hot reload in an `<AppContainer />` element.  However, after messing with this for a while I could not get this to preserve any component state.  Anyway, as of `react-hot-loader` v4, it is recommended to use the new `hot(module)( ... )` api instead of the `<AppContainer />` component, which requires much less configuration.
 
 First, we go to the root component that we want to hot-reload, in this case the `Routes` component in `routes.tsx`, and we wrap the export in a `hot(module)( ... );` call.
 
