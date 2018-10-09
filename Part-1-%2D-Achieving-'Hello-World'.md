@@ -94,8 +94,6 @@ _tsconfig.json_
 
 One important thing that this tsconfig is doing is defining how modules are going to be hooked up.  By default, the TypeScript compiler will output CommonJS modules.  While these will work just fine, they prevent webpack from performing important tree-shaking optimizations.  Therefore, it is important to make sure that ES6 modules are used instead.  ES6 modules are used by default when ES6+ is set as the target, but in this case we are using the default ES3 target for the TypeScript compiler.
 
-We will be invoking the TypeScript compiler as a part of our webpack build process, so we don't need to use it to transpile down to browser-compatible code yet.
-
 ## The webpack.config.js
 
 The last initialization related file we will need is the webpack.config.js file.  This is used to configure our webpack build process.  This involves things like setting up the entry point, output files, and the loaders used to process each type of file.  Before we can create it, we will need to decide something about our project structure.  Here is the folder structure that I will be using for this tutorial:
