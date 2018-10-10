@@ -313,7 +313,7 @@ _src/devmain.html_
 </html>
 ```
 
-Finally, we need to update our server to know which file to serve.  Update `App.ts` to check the environment, and then serve the correct html file:
+Finally, we need to update our server to know which file to serve.  Update `App.ts` to check the environment, and then serve the correct html file.  Remember that the paths are relative to the original `App.ts` file.
 
 ```ts
         //serve static home page for all remaining requests
@@ -324,6 +324,39 @@ Finally, we need to update our server to know which file to serve.  Update `App.
                 filePath = path.resolve(__dirname, '../devmain.html');
             } else {
                 filePath = path.resolve(__dirname, '../../public/main.html');
+            }
+            res.sendFile(filePath);
+        });
+```
+
+# Other improvements
+
+## Cache Busting
+
+We need to ensure that our resources are cached when possible, but still reloaded after being updated.  We will accomplish this by simply adding a hash to the 
+
+## Serving 404 errors for missing static files.
+
+Right now in the application, any requests for files that do not exist are simply served our index page.  This is because we have mapped the "*" url at the end of our middleware pipeline to always serve an html page.  However, it would be much better, both for debugging and for general correctness, if requests to files that didn't exist were instead served a 404 error.
+
+To do this, we are going to update our "*" request handler to check to see if the url looks like it is supposed to be a static file.  If it is, then we pass the request to the next middleware.  Otherwise, we serve our html index page.  When we pass the request to the next middleware, but no middleware comes next, this will cause express to generate a 404 error.  Any requests for static files which actually exist would already have been handled by the static files middleware that is invoked previously.  To check if the request looks like a static file, we will just check if the last '.' character comes after the last '/' in the url path.  This isn't bulletproof, but it doesn't need to be.
+
+Update `App.tsx` to do this check before it serves 
+
+```ts
+        //serve static home page for all remaining requests
+        this.express.get("*", (req, res, next) => {
+            if(req.path.lastIndexOf('.') > req.path.lastIndexOf('/')) {
+                //if this request looks like a static file, ignore it
+                return next();
+            }
+
+            let filePath: string;
+
+            if(process.env.NODE_ENV === 'development') {
+                filePath = path.resolve(__dirname, '../devmain.html');
+            } else {
+                filePath = path.resolve(__dirname, '../../public/build/main.html');
             }
             res.sendFile(filePath);
         });
