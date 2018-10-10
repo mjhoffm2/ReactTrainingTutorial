@@ -156,4 +156,4 @@ Now, in production mode, we will only have one entry point, and no plugins.
 
 ## Separate CSS
 
-Right now, we are including the entire bootstrap stylesheet in the bundle itself.  
+Right now, we are including the entire bootstrap stylesheet in the bundle itself.  Let's put 
