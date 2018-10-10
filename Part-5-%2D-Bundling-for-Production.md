@@ -423,6 +423,8 @@ Update `App.tsx` to do this check before it serves the html page:
         });
 ```
 
+Now a request to http://localhost:3000/some/random.file will throw a 404 error instead of being handled by your front end code.
+
 # Final Results
 
 ## File Structure
@@ -602,4 +604,66 @@ export class App {
 
     }
 }
+```
+
+## Try it out
+
+`npm run build:prod`
+
+```
+Child web:
+    Hash: 2d370c28a0f9217e5bfa
+    Time: 11565ms
+    Built at: 2018-10-10 13:41:19
+                                     Asset       Size  Chunks                    Chunk Names
+     fa2772327f55d8198301fdb8bcfc8158.woff   22.9 KiB          [emitted]
+      f4769f9bdb7466be65088239c12046d1.eot   19.7 KiB          [emitted]
+    448c34a56d699c29117adc64c43affeb.woff2   17.6 KiB          [emitted]
+      89889688147bd7575d6327160d64e760.svg    106 KiB          [emitted]
+      e18bbf611f2a2e43afc071aa2f4e1512.ttf   44.3 KiB          [emitted]
+                                  main.css    143 KiB       0  [emitted]         main
+                                 bundle.js    254 KiB       0  [emitted]  [big]  main
+                              main.css.map    183 KiB       0  [emitted]         main
+                             bundle.js.map    891 KiB       0  [emitted]         main
+                                 main.html  338 bytes          [emitted]
+    Entrypoint main [big] = main.css bundle.js main.css.map bundle.js.map
+     [11] (webpack)/buildin/global.js 509 bytes {0} [built]
+     [12] ./node_modules/history/es/index.js + 7 modules 31.9 KiB {0} [built]
+          |    8 modules
+     [22] ./node_modules/react-redux/es/index.js + 23 modules 43 KiB {0} [built]
+          |    24 modules
+     [30] ./src/web/actions/actionTypes.ts 192 bytes {0} [built]
+     [34] ./node_modules/react-router/es/index.js + 5 modules 16.5 KiB {0} [built]
+          |    6 modules
+     [55] (webpack)/buildin/harmony-module.js 573 bytes {0} [built]
+     [71] ./src/web/routes.tsx 546 bytes {0} [built]
+     [76] ./src/web/components/Channels.tsx + 7 modules 24 KiB {0} [built]
+          |    8 modules
+     [77] ./src/web/components/Home.tsx + 1 modules 3.22 KiB {0} [built]
+          |    2 modules
+     [78] multi ./src/web/boot-client.tsx 28 bytes {0} [built]
+    [147] ./src/web/styles/Counter.css 39 bytes {0} [built]
+    [148] ./src/web/util/polyfills.js 1.69 KiB {0} [built]
+    [153] ./src/web/boot-client.tsx + 1 modules 1.99 KiB {0} [built]
+          | ./src/web/boot-client.tsx 1.11 KiB [built]
+          | ./src/web/reducers/reducer.ts 843 bytes [built]
+    [159] ./node_modules/react-bootstrap/es/Panel.js + 8 modules 23.7 KiB {0} [built]
+          |    9 modules
+        + 307 hidden modules
+
+    WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+    This can impact web performance.
+    Assets:
+      bundle.js (254 KiB)
+
+    WARNING in entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+    Entrypoints:
+      main (397 KiB)
+          main.css
+          bundle.js
+
+
+    WARNING in webpack performance recommendations:
+    You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+    For more info visit https://webpack.js.org/guides/code-splitting/
 ```
