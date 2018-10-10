@@ -114,6 +114,8 @@ var config = (env, options) => [
 module.exports = config;
 ```
 
+For more information, see the official documentation: https://webpack.js.org/configuration/configuration-types/
+
 With the new format, we are able to access the `env` and `options` parameters.  In particular, `options.mode` will be set to `'production'` or `'development'` based on the mode that we provided.  Using this, we can now set up our webpack configuration so that we return a slightly different config based on which environment we are compiling for.
 
 ### Update webpack-dev-middleware
@@ -316,6 +318,8 @@ _src/devmain.html_
 </html>
 ```
 
+The development html file will only include the bundle.js file, while the production html file also includes the css file.
+
 Finally, we need to update our server to know which file to serve.  Update `App.ts` to check the environment, and then serve the correct html file.  Remember that the paths are relative to the original `App.ts` file.
 
 ```ts
@@ -336,7 +340,7 @@ Finally, we need to update our server to know which file to serve.  Update `App.
 
 ## Cache Busting
 
-We need to ensure that our resources are cached when possible, but still reloaded after being updated.  We will accomplish this by simply adding a hash to the end of our static assets.  We will not be changing the name of the actual assets themselves, instead we will add query parameters to the resources loaded by the production `main.html` file.  This means that we will need to dynamically create our production `main.html` file.
+We need to ensure that our resources are cached when possible, but still reloaded after being updated.  We will accomplish this by simply adding a hash to the end of our static assets.  We will not be changing the name of the actual assets themselves, instead we will add query parameters to the resources loaded by the production `main.html` file.  This means that we will need to dynamically create our production `main.html` file to use the correct hashes from the webpack build.
 
 To do this, we will use the `html-webpack-plugin`.  Since our production html file will now be built for us, it makes sense to move it to the `public/build` folder and ignore it in `.gitignore`.
 
