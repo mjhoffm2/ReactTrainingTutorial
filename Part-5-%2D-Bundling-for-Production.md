@@ -65,7 +65,7 @@ This will let us maintain the same behavior as before without adjusting any of o
 
 ## Source Maps
 
-The biggest contributor to the size of our production bundle is the source maps that are generated in the bundle itself.  In production mode, we should either generate the source maps as a separate file, or omit the source maps altogether.  Using the new `options.mode` parameter that we obtained, this is easy to configure.  Simply change the `devtool` option in web configuration section of the `webpack.config.js` file.
+The biggest contributor to the size of our production bundle is the source maps that are generated in the bundle itself.  In production mode, we should either generate the source maps as a separate file, or omit the source maps altogether.  Using the new `options.mode` parameter that we set up, this is easy to configure.  Simply change the `devtool` option in web configuration section of the `webpack.config.js` file.
 
 _webpack.config.js_
 ```js
@@ -130,4 +130,30 @@ With this change alone, we have reduced the size of our production bundle to abo
 
 ## Disable Hot Module Replacement
 
-In production, we will not be using hot module replacement, so we might as well remove it from our configuration in production mode.
+In production, we will not be using hot module replacement, so we might as well remove it from our configuration in production mode.  This involves removing the hot module replacement plugin, as well as the entry point we added.
+
+_webpack.config.js_
+```js
+    //web configuration
+    {
+        name: 'web',
+        entry: options.mode === 'production' ? [
+            './src/web/boot-client.tsx'
+        ] : [
+            //we configure the hot reloader as a separate entry point to the application
+            'webpack-hot-middleware/client',
+
+            './src/web/boot-client.tsx'
+        ],
+        ...
+        plugins: options.mode === 'production' ? [] : [
+            new webpack.HotModuleReplacementPlugin()
+        ]
+    }
+```
+
+Now, in production mode, we will only have one entry point, and no plugins.
+
+## Separate CSS
+
+Right now, we are including the entire bootstrap stylesheet in the bundle itself.  
