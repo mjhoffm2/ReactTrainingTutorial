@@ -333,7 +333,68 @@ Finally, we need to update our server to know which file to serve.  Update `App.
 
 ## Cache Busting
 
-We need to ensure that our resources are cached when possible, but still reloaded after being updated.  We will accomplish this by simply adding a hash to the 
+We need to ensure that our resources are cached when possible, but still reloaded after being updated.  We will accomplish this by simply adding a hash to the end of our static assets.  We will not be changing the name of the actual assets themselves, instead we will add query parameters to the resources loaded by the production `main.html` file.  This means that we will need to dynamically create our production `main.html` file.
+
+To do this, we will use the `html-webpack-plugin`.  Since our production html file will now be built for us, it makes sense to move it to the `public/build` folder and ignore it in `.gitignore`.
+
+We will instead use an html template file to generate our final production html file.  Create a new file called `template.html` in the `src` directory.
+
+_src/template.html_
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>React Demo</title>
+    <base href="/" />
+</head>
+<body>
+    <div id="root">Loading...</div>
+</body>
+</html>
+```
+
+This file doesn't contain any references to any of our static resources.  These will be added by the `html-webpack-plugin`.  Update the plugins for the web part of our webpack config to support this.
+
+_webpack.config.js_
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+```
+```js
+    //web configuration
+    {
+        name: 'web',
+        ...
+        plugins: options.mode === 'production' ? [
+            new MiniCssExtractPlugin(),
+            new HtmlWebpackPlugin({
+                filename: 'main.html',
+                hash: true,
+                template: './src/template.html'
+            })
+        ] : [
+            new webpack.HotModuleReplacementPlugin()
+        ]
+    }
+```
+
+This will cause a main.html file to be created based on the template we provided.  It will automatically include our bundle and our css file, and append a hash to each of them.  As long as the files do not change, this hash will stay the same and caching will be possible.  As soon as one of those files changes, the hash will change and force browsers to reload that resource.
+
+We will also need to update `App.tsx` to reflect the new location of the production `main.html` file.
+```ts
+
+        //serve static home page for all remaining requests
+        this.express.get("*", (req, res, next) => {
+            let filePath: string;
+
+            if(process.env.NODE_ENV === 'development') {
+                filePath = path.resolve(__dirname, '../devmain.html');
+            } else {
+                filePath = path.resolve(__dirname, '../../public/build/main.html');
+            }
+            res.sendFile(filePath);
+        });
+```
 
 ## Serving 404 errors for missing static files.
 
@@ -341,7 +402,7 @@ Right now in the application, any requests for files that do not exist are simpl
 
 To do this, we are going to update our "*" request handler to check to see if the url looks like it is supposed to be a static file.  If it is, then we pass the request to the next middleware.  Otherwise, we serve our html index page.  When we pass the request to the next middleware, but no middleware comes next, this will cause express to generate a 404 error.  Any requests for static files which actually exist would already have been handled by the static files middleware that is invoked previously.  To check if the request looks like a static file, we will just check if the last '.' character comes after the last '/' in the url path.  This isn't bulletproof, but it doesn't need to be.
 
-Update `App.tsx` to do this check before it serves 
+Update `App.tsx` to do this check before it serves the html page:
 
 ```ts
         //serve static home page for all remaining requests
@@ -360,4 +421,185 @@ Update `App.tsx` to do this check before it serves
             }
             res.sendFile(filePath);
         });
+```
+
+# Final Results
+
+## File Structure
+
+![image.png](/.attachments/image-666e40ec-cb9d-4b37-b25a-e3a441f69d1c.png)
+
+## webpack.config.js
+
+```js
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
+const webpack = require('webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+var config = (env, options) => [
+    //web configuration
+    {
+        name: 'web',
+        entry: options.mode === 'production' ? [
+            './src/web/boot-client.tsx'
+        ] : [
+            //we configure the hot reloader as a separate entry point to the application
+            'webpack-hot-middleware/client',
+
+            './src/web/boot-client.tsx'
+        ],
+        output: {
+            path: path.resolve(__dirname, './public/build'),
+            publicPath: '/build/',
+            filename: 'bundle.js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test:/\.css$/,
+                    use: options.mode === 'production' ?
+                        [MiniCssExtractPlugin.loader, 'css-loader'] :
+                        ['style-loader', 'css-loader'],
+                },
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/web/"),
+                    loader: "awesome-typescript-loader"
+                },
+                {
+                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf|woff|woff2|eot)$/,
+                    loader: 'url-loader?limit=4096'
+                }
+            ]
+        },
+
+        //see https://webpack.js.org/configuration/devtool/ for options
+        devtool: options.mode === 'production' ? "source-map" : "cheap-module-eval-source-map",
+
+        plugins: options.mode === 'production' ? [
+            new MiniCssExtractPlugin(),
+            new HtmlWebpackPlugin({
+                filename: 'main.html',
+                hash: true,
+                template: './src/template.html'
+            })
+        ] : [
+            new webpack.HotModuleReplacementPlugin()
+        ]
+    },
+
+    //server configuration
+    {
+        name: 'server',
+        entry: ['./src/server/main.ts'],
+        target: 'node',
+        externals: [nodeExternals()],
+        output: {
+            path: path.resolve(__dirname, './build'),
+            filename: '[name].js',
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test:/\.tsx?$/,
+                    include: path.resolve(__dirname, "./src/server/"),
+                    loader: "awesome-typescript-loader"
+                }
+            ]
+        },
+
+        //by default, webpack will set these to '/', so override that behavior on the server
+        node: {
+            //setting these to 'true' causes them to keep the same values relative to the source code
+            //setting these to 'false' would cause them to have values relative to the output code
+            __dirname: true,
+            __filename: true
+        }
+    }
+];
+module.exports = config;
+```
+
+## App.ts
+
+```ts
+import * as express from "express";
+import * as path from "path";
+import * as webpack from 'webpack';
+import * as devMiddleware from 'webpack-dev-middleware';
+import * as hotMiddleware from 'webpack-hot-middleware';
+import {Configuration} from "webpack";
+
+const configs: (env: any, options: any) => Configuration[] = require('../../webpack.config');
+const config = configs({}, {mode: "development"}).find(config => config.name === "web");
+
+export class App {
+    // ref to Express instance
+    public express: express.Application;
+    //Run configuration methods on the Express instance.
+    constructor() {
+        this.express = express();
+
+        this.configureMiddleWare();
+
+        //configure endpoints that are handled by api calls
+        this.configureApi();
+
+        //static files
+        this.express.use(express.static(path.join(__dirname, '../../public')));
+
+        //serve static home page for all remaining requests
+        this.express.get("*", (req, res, next) => {
+            if(req.path.lastIndexOf('.') > req.path.lastIndexOf('/')) {
+                //if this request looks like a static file, ignore it
+                return next();
+            }
+
+            let filePath: string;
+
+            if(process.env.NODE_ENV === 'development') {
+                filePath = path.resolve(__dirname, '../devmain.html');
+            } else {
+                filePath = path.resolve(__dirname, '../../public/build/main.html');
+            }
+            res.sendFile(filePath);
+        });
+    }
+
+    // Configure Express middleware.
+    private configureMiddleWare(): void {
+
+        if(process.env.NODE_ENV === 'development') {
+
+            const compiler = webpack({
+                ...config,
+                mode: "development",
+            });
+            //const compiler = webpack(configs);
+
+            //enable hot module replacement part 1
+            this.express.use(devMiddleware(compiler, {
+                publicPath: config!.output!.publicPath!
+            }));
+
+            //enable hot module replacement part 1
+            this.express.use(hotMiddleware(compiler));
+        }
+    }
+
+    // Configure API endpoints.
+    private configureApi(): void {
+
+    }
+}
 ```
