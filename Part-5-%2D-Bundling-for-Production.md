@@ -396,6 +396,23 @@ We will also need to update `App.tsx` to reflect the new location of the product
         });
 ```
 
+The final html files generated should look something like this:
+
+_main.html_
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>React Demo</title>
+    <base href="/" />
+<link href="/build/main.css?2d370c28a0f9217e5bfa" rel="stylesheet"></head>
+<body>
+    <div id="root">Loading...</div>
+<script type="text/javascript" src="/build/bundle.js?2d370c28a0f9217e5bfa"></script></body>
+</html>
+```
+
 ## Serving 404 errors for missing static files.
 
 Right now in the application, any requests for files that do not exist are simply served our index page.  This is because we have mapped the "*" url at the end of our middleware pipeline to always serve an html page.  However, it would be much better, both for debugging and for general correctness, if requests to files that didn't exist were instead served a 404 error.
@@ -667,3 +684,10 @@ Child web:
     You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
     For more info visit https://webpack.js.org/guides/code-splitting/
 ```
+
+Although webpack is still warning us about the size of our bundle, it is still a vast improvement compared to what it was before.  Additional steps that we could take include:
+ - Include only the bootstrap css that we need, instead of the entire 140kb+ stylesheet.
+ - Split our bundle.js into two or more bundles, such as a bundle for our application code and a bundle for our 'vendor' code such as react and redux.
+
+## Download Source
+https://dev.azure.com/echeloncons/_git/Slack Training App?version=GBPart-5
