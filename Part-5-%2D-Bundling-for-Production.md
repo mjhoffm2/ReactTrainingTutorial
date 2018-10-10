@@ -6,6 +6,76 @@ This part of the tutorial is continued from [Part 4 - Improving the Development 
 
 After everything is said and done, we still need to be able to ship some quality code.  If you have been following the tutorial exactly up to this point, you may have noticed that our bundle is about 5.57 MB when built with --mode=development.  However, when built when --mode=production, the bundle is still about 2.25 MB.  This is way too large, so we are going to need to address this.
 
+## Install new dependencies
+
+The following `package.json` file contains the updated dependencies we will need for this part of the tutorial:
+
+_package.json_
+```json
+{
+  "name": "react-demo",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/.bin/webpack --mode=development",
+    "build:prod": "node_modules/.bin/webpack --mode=production",
+    "host": "node ./build/main.js --mode=development",
+    "host:prod": "node ./build/main.js --mode=production",
+    "dev": "node_modules/.bin/webpack --mode=development --config-name=server & node ./build/main.js --mode=development"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/es6-promise": "^3.3.0",
+    "@types/express": "^4.16.0",
+    "@types/react": "^16.4.13",
+    "@types/react-bootstrap": "^0.32.13",
+    "@types/react-dom": "^16.0.7",
+    "@types/react-redux": "^6.0.9",
+    "@types/react-router": "^4.0.30",
+    "@types/react-router-dom": "^4.3.1",
+    "@types/webpack": "^4.4.14",
+    "@types/webpack-dev-middleware": "^2.0.2",
+    "@types/webpack-env": "^1.13.6",
+    "@types/webpack-hot-middleware": "^2.16.4",
+    "awesome-typescript-loader": "^5.2.1",
+    "bootstrap": "^3.3.7",
+    "connected-react-router": "^4.5.0",
+    "css-loader": "^1.0.0",
+    "es6-promise": "^4.2.5",
+    "express": "^4.16.3",
+    "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.4.4",
+    "react": "^16.5.0",
+    "react-bootstrap": "^0.32.4",
+    "react-dom": "^16.5.0",
+    "react-hot-loader": "^4.3.11",
+    "react-redux": "^5.0.7",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
+    "redux": "^4.0.0",
+    "style-loader": "^0.23.0",
+    "typescript": "^3.0.3",
+    "url-loader": "^1.1.1",
+    "webpack-dev-middleware": "^3.4.0",
+    "webpack-hot-middleware": "^2.24.3",
+    "webpack-node-externals": "^1.7.2",
+    "whatwg-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.17.2",
+    "webpack-cli": "^3.1.0"
+  }
+}
+```
+
+Important additions include:
+ - html-webpack-plugin
+ - mini-css-extract-plugin
+
 ## Dynamic Webpack Configuration
 
 ### Overview
@@ -154,6 +224,107 @@ _webpack.config.js_
 
 Now, in production mode, we will only have one entry point, and no plugins.
 
+## Limit Url Loader size
+
+Originally, we configured url loader to inline many of our assets as base64 url strings as long as they are under 25 kb.  However, it turns out that pretty much all of the resources that this is bundling are from bootstrap, and are unused.  Let's lower this limit to 4 kb.
+
+_webpack.config.js_
+```js
+
+                {
+                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf|woff|woff2|eot)$/,
+                    loader: 'url-loader?limit=4096'
+                }
+```
+
+When this limit is exceeded, url-loader will fall back to using file-loader instead.  In the future, we will probably want to be more selective about what gets bundled and what doesn't.  For example, if our page has some images which are always rendered (such as a logo), then it makes sense to bundle that, even if it is larger than 4 kb.  When we fall back to using file-loader instead of url-loader, we need to make a separate request for the resource when it is used.
+
+You can see the effect of this if you open the application check the network requests that have been made.  If you navigate to a page like http://localhost:3000/channels/3/view, you will see that an additional network request for a woff2 font is made in order to correctly display the 'x' on the close button.
+
+![image.png](/.attachments/image-971015d8-68d2-45e7-ba3f-fc81f983b3af.png)
+
+If you never visit this page, that network request is never made.  As a result, it is important to understand how you expect your application to be used, and balance bundling with requiring separate requests.
+
 ## Separate CSS
 
-Right now, we are including the entire bootstrap stylesheet in the bundle itself.  Let's put 
+Right now, we are including the entire bootstrap stylesheet in the bundle itself.  It would be much better to have our css and other resources separated from our main bundle.  To do this, we will be using the `mini-css-extract-plugin`, which will put all of our css into a single css file, separate from our main bundle.  However, we do not want this plugin to be used during development, since it will break hot module reloading, and slow down the build process.  Therefore, we need to make sure it is only used for production builds.
+
+To use this plugin, we are first going to update the `webpack.config.js` file to add it as a plugin, and use the associated loader for css files.
+
+_webpack.config.js_
+```js
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+```
+```js
+        module: {
+            rules: [
+                {
+                    test:/\.css$/,
+                    use: options.mode === 'production' ?
+                        [MiniCssExtractPlugin.loader, 'css-loader'] :
+                        ['style-loader', 'css-loader'],
+                },
+                ...
+            ]
+        },
+        ...
+        plugins: options.mode === 'production' ? [
+            new MiniCssExtractPlugin()
+        ] : [
+            new webpack.HotModuleReplacementPlugin()
+        ]
+```
+This configuration will cause a `main.css` file to be generated in the `public/build` folder.
+
+If you try to build and run the production code, you will quickly discover that the styling is no longer being applied!  This is because the styling in production is no longer included in the bundle, we will need to update our `main.html` file to load it by placing `<link href="/build/main.css" rel="stylesheet">` in the header.
+
+But wait!  This stylesheet only applies to production code, we don't want that `<link>` tag in development mode.  Our styling will already be included in the javascript bundle, and having the extra tag will cause issues with duplicate or out of date styles.  There are a couple of ways to deal with this problem, but I chose to essentially have two separate .html files, one for development and one for production.  The existing main.html becomes the production version, and a new `devmain.html` is added to the `src` folder.
+
+_public/main.html_
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>React Demo</title>
+    <base href="/" />
+    <link href="/build/main.css" rel="stylesheet">
+</head>
+<body>
+    <div id="root">Loading...</div>
+    <script type="text/javascript" src="/build/bundle.js"></script>
+</body>
+</html>
+```
+
+_src/devmain.html_
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>React Demo</title>
+    <base href="/" />
+</head>
+<body>
+    <div id="root">Loading...</div>
+    <script src="./build/bundle.js"></script>
+</body>
+</html>
+```
+
+Finally, we need to update our server to know which file to serve.  Update `App.ts` to check the environment, and then serve the correct html file:
+
+```ts
+        //serve static home page for all remaining requests
+        this.express.get("*", (req, res, next) => {
+            let filePath: string;
+
+            if(process.env.NODE_ENV === 'development') {
+                filePath = path.resolve(__dirname, '../devmain.html');
+            } else {
+                filePath = path.resolve(__dirname, '../../public/main.html');
+            }
+            res.sendFile(filePath);
+        });
+```
