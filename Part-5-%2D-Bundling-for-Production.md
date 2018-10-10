@@ -28,6 +28,7 @@ _package.json_
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/compression": "0.0.36",
     "@types/es6-promise": "^3.3.0",
     "@types/express": "^4.16.0",
     "@types/react": "^16.4.13",
@@ -42,6 +43,7 @@ _package.json_
     "@types/webpack-hot-middleware": "^2.16.4",
     "awesome-typescript-loader": "^5.2.1",
     "bootstrap": "^3.3.7",
+    "compression": "^1.7.3",
     "connected-react-router": "^4.5.0",
     "css-loader": "^1.0.0",
     "es6-promise": "^4.2.5",
@@ -75,6 +77,7 @@ _package.json_
 Important additions include:
  - html-webpack-plugin
  - mini-css-extract-plugin
+ - compression
 
 ## Dynamic Webpack Configuration
 
@@ -380,7 +383,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 This will cause a main.html file to be created based on the template we provided.  It will automatically include our bundle and our css file, and append a hash to each of them.  As long as the files do not change, this hash will stay the same and caching will be possible.  As soon as one of those files changes, the hash will change and force browsers to reload that resource.
 
-We will also need to update `App.tsx` to reflect the new location of the production `main.html` file.
+We will also need to update `App.ts` to reflect the new location of the production `main.html` file.
 ```ts
 
         //serve static home page for all remaining requests
@@ -419,7 +422,7 @@ Right now in the application, any requests for files that do not exist are simpl
 
 To do this, we are going to update our "*" request handler to check to see if the url looks like it is supposed to be a static file.  If it is, then we pass the request to the next middleware.  Otherwise, we serve our html index page.  When we pass the request to the next middleware, but no middleware comes next, this will cause express to generate a 404 error.  Any requests for static files which actually exist would already have been handled by the static files middleware that is invoked previously.  To check if the request looks like a static file, we will just check if the last '.' character comes after the last '/' in the url path.  This isn't bulletproof, but it doesn't need to be.
 
-Update `App.tsx` to do this check before it serves the html page:
+Update `App.ts` to do this check before it serves the html page:
 
 ```ts
         //serve static home page for all remaining requests
@@ -441,6 +444,30 @@ Update `App.tsx` to do this check before it serves the html page:
 ```
 
 Now a request to http://localhost:3000/some/random.file will throw a 404 error instead of being handled by your front end code.
+
+## Compression
+
+Compression is the easiest way to reduce the amount of bandwidth required by your application.  All we need to do is configure the `compression` middleware in our express server.  Let's update `App.ts` to do this:
+
+```ts
+import * as compression from 'compression';
+```
+```ts
+export class App {
+    constructor() {
+        this.express = express();
+        this.express.use(compression());
+        ...
+    }
+    ...
+}
+```
+
+Make sure that you include the middleware so it is earlier in the pipeline than all of your other middlewares which will potentially generate a response.  Now we just rebuild and run our server in production mode, and take a look at the network requests.
+
+![image.png](/.attachments/image-c3bd8714-9884-4166-9f85-becde789f59c.png)
+
+That is a pretty impressive improvement from the 2.2 MB production bundle we started with.
 
 # Final Results
 
@@ -685,8 +712,8 @@ Child web:
     For more info visit https://webpack.js.org/guides/code-splitting/
 ```
 
-Although webpack is still warning us about the size of our bundle, it is still a vast improvement compared to what it was before.  Additional steps that we could take include:
- - Include only the bootstrap css that we need, instead of the entire 140kb+ stylesheet.
+Although webpack is still warning us about the size of our bundle, it is still a vast improvement compared to what it was before.  When combined with compression, this is significantly better than it looks.  Additional steps that we could take include:
+ - Include only the bootstrap css that we need, instead of the entire 140kb+ stylesheet.  We have a lot of unused bootstrap styles, so this is a strong candidate for removing dead code.
  - Split our bundle.js into two or more bundles, such as a bundle for our application code and a bundle for our 'vendor' code such as react and redux.
 
 ## Download Source
