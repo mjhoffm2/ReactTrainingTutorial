@@ -403,7 +403,7 @@ We will also need to update `App.ts` to reflect the new location of the producti
         });
 ```
 
-The final html files generated should look something like this:
+The final html file generated should look something like this:
 
 _main.html_
 ```html
