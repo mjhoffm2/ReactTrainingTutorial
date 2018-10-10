@@ -518,7 +518,7 @@ Additionally, while react-hot-reloader works in 99% of cases, it is possible to 
 
 ### Setup
 
-Setting this up is very simple. All we should need to do is go to `boot-client.tsx` and wrap the part we want to hot reload in an `<AppContainer />` element.  However, after messing with this for a while I could not get this to preserve any component state.  Anyway, as of `react-hot-loader` v4, it is recommended to use the new `hot(module)( ... )` api instead of the `<AppContainer />` component, which requires much less configuration.
+Setting this up is very simple. All we should need to do is go to `boot-client.tsx` and wrap the part we want to hot reload in an `<AppContainer />` element from react-hot-loader, and update some configuration.  However, after messing with this for a while I could not get this to preserve any component state.  Anyway, as of `react-hot-loader` v4, it is recommended to use the new `hot(module)( ... )` api instead of the `<AppContainer />` component, which requires much less configuration.
 
 First, we go to the root component that we want to hot-reload, in this case the `Routes` component in `routes.tsx`, and we wrap the export in a `hot(module)( ... );` call.
 
@@ -699,7 +699,7 @@ The dev middleware also has an option to output the code it builds to disc.  How
 
 ### Overview
 
-If you have already configured part of your application to hot reload using either webpack-hot-middleware or react-hot-loader, then you already support hot reloading css.  All you need to do is make sure you are using `style-loader` to handle css (or less/scss), and any updates to your styles will be automatically reloaded.  You also have to make sure you are importing them through javascript, and not just adding the stylesheet directly to your html bundle.  You don't even need to import the css in a module being hot reloaded, so you can import directly in `boot-client.tsx` if you wish.
+If you have already configured part of your application to hot reload using either webpack-hot-middleware or react-hot-loader, then you already support hot reloading css.  All you need to do is make sure you are using `style-loader` to handle css (or less/scss), and any updates to your styles will be automatically reloaded.  You also have to make sure you are importing them through javascript via `import` statements, and not just adding the stylesheet directly to your html bundle.  You don't even need to import the css in a react module being hot reloaded, so you can import directly in `boot-client.tsx` if you wish.
 
 ### CSS Extracting Plugins
 
