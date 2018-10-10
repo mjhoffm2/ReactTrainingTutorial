@@ -67,7 +67,7 @@ Next, we will change a few things in the webpack configuration.  First of all, w
 
 In the server configuration, we will change the `node` option to have `__dirname` and `__filename` both be true instead of false.  This will make it so that __dirname and __filename will be preserved relative to the original source code.  That way, when you reference a file relative to your source code, you don't need to know exactly where it will end up being built.  Additionally, this fixes the behavior of `path.resolve( ... )` in some scenarios.
 
-In the web configuration, we will add a `publicPath` field to the `output` option, which will be `'build/'`.  We will also change the `devtool` option to be `"cheap-module-eval-source-map"`.  This is much faster to build during development, particularly when re-building using the webpack dev middleware we will be configuring later.  However, this will not build anything for production.  If you find yourself in need of a source map in production code, then you can change this to something like `devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'cheap-module-eval-source-map'`.
+In the web configuration, we will add a `publicPath` field to the `output` option, which will be `'/build/'`.  We will also change the `devtool` option to be `"cheap-module-eval-source-map"`.  This is much faster to build during development, particularly when re-building using the webpack dev middleware we will be configuring later.  However, this will not build anything for production.  If you find yourself in need of a source map in production code, then you can change this to something like `devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'cheap-module-eval-source-map'`.
 
 _webpack.config.js_
 ```js
@@ -83,7 +83,7 @@ var config = [
         ],
         output: {
             path: path.resolve(__dirname, './public/build'),
-            publicPath: 'build/',
+            publicPath: '/build/',
             filename: 'bundle.js',
         },
         resolve: {
@@ -429,7 +429,7 @@ var config = [
         ],
         output: {
             path: path.resolve(__dirname, './public/build'),
-            publicPath: 'build/',
+            publicPath: '/build/',
             filename: 'bundle.js',
         },
         resolve: {
