@@ -690,4 +690,5 @@ Although webpack is still warning us about the size of our bundle, it is still a
  - Split our bundle.js into two or more bundles, such as a bundle for our application code and a bundle for our 'vendor' code such as react and redux.
 
 ## Download Source
-https://dev.azure.com/echeloncons/_git/Slack Training App?version=GBPart-5
+
+https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-4
