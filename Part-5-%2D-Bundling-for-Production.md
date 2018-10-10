@@ -720,7 +720,9 @@ Child web:
     For more info visit https://webpack.js.org/guides/code-splitting/
 ```
 
-Although webpack is still warning us about the size of our bundle, it is still a vast improvement compared to what it was before.  When combined with compression, this is significantly better than it looks.  Additional steps that we could take include:
+Although webpack is still warning us about the size of our bundle, it is still a vast improvement compared to what it was before.  When combined with compression, this is significantly better than it looks.
+
+Additional steps that we could take include:
  - Include only the bootstrap css that we need, instead of the entire 140kb+ stylesheet.  We have a lot of unused bootstrap styles, so this is a strong candidate for removing dead code.
  - Split our bundle.js into two or more bundles, such as a bundle for our application code and a bundle for our 'vendor' code such as react and redux.
 
