@@ -4,7 +4,7 @@
 
 This part of the tutorial is continued from [Part 4 - Improving the Development Experience](/Part-4-%2D-Improving-the-Development-Experience).
 
-After everything is said and done, we still need to be able to ship some quality code.  If you have been following the tutorial exactly up to this point, you may have noticed that our bundle is about 5.57 MB when built with --mode=development.  However, when built when --mode=production, the bundle is still about 2.25 MB.  This is way too large, so we are going to need to address this.
+After everything is said and done, we still need to be able to ship some quality code.  If you have been following the tutorial exactly up to this point, you may have noticed that our bundle is about 5.57 MB when built with `--mode=development`.  However, when built with `--mode=production`, the bundle is still about 2.25 MB.  This is way too large, so we are going to need to address this.
 
 ## Install new dependencies
 
@@ -77,7 +77,7 @@ _package.json_
 Important additions include:
  - html-webpack-plugin
  - mini-css-extract-plugin
- - compression
+ - compression and @types/compression
 
 ## Dynamic Webpack Configuration
 
