@@ -10,6 +10,7 @@ So far, we have set up our project to be served from a Node server running Expre
 
 I would recommend initializing the project from a template, and then modifying the template to suit your needs.  If you already have set up some kind of api server using .NET Core, then you can work from there.  In this tutorial, I will be using .NET Core 2.1.
 
+First, you will need to install the .NET Core SDK
 https://www.microsoft.com/net/download/dotnet-core/2.1
 I am using v2.1.5 - SDK 2.1.403
 
@@ -18,5 +19,7 @@ I am using v2.1.5 - SDK 2.1.403
 ![image.png](/.attachments/image-5c11032d-54ef-40ab-afcc-e6e6cd4f4136.png)
 
 Warning: If you check the box that says "Create new Git repository", and the folder or one of its parents already has an existing .git folder, then you may end up corrupting the existing git repository.
+
+![image.png](/.attachments/image-8f1c5101-06bc-4d03-b3bd-e687b8f50963.png)
 
 To help you get started, here is a zip containing a .gitignore file that you can place in the same directory as your .csproj file: [gitignore.zip](/.attachments/gitignore-f78fa947-dee4-4e71-8270-5aedfe985437.zip).
