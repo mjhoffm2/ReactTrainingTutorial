@@ -262,28 +262,52 @@ Important changes:
 5. Adjusted the output to reflect the new output directory and public path.
 6. Removed the hot module replacement plugin during development.
 
-# Issues I ran into and how to address them
+## Configuring ASP.NET Core to host the code.
 
-## Unable to connect to IIS Express
+### Webpack Dev Middleware
+
+Just like on the node server, we will be using webpack dev middleware to build and serve our code during development.  This will be configured as part of our HTTP request pipeline in the `Configure` method of our `Startup` class.  Simply add the Webpack Dev Middleware, which is available as part of AspNetCore.SpaServices.
+
+_Startup.cs_
+```cs
+if (env.IsDevelopment())
+{
+	//do not attempt to use hot reloading on staging or production
+	app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+	{
+		HotModuleReplacement = true,
+		EnvParam = new { NODE_ENV = "development" }
+	});
+}
+
+app.UseStaticFiles();
+```
+
+It is important to make sure that you add this middleware _before_ the call to `app.UseStaticFiles();`.  It is also important that this middleware is only used in development mode.  In this middleware, we have configured hot module replacement to be enabled, as well as specified the value of `env.NODE_ENV` that will be provided to the webpack configuration.
+
+
+## Issues I ran into and how to address them
+
+### Unable to connect to IIS Express
 
 When trying to debug the application for the first time, I got an error about being "unable to connect to web server 'IIS Express'.  I am not sure exactly what caused this and how to fix it, but the issue went away after I did the following.
 
 1. Disable the ssl port in the launch settings by removing the "sslPort" field in "iisExpress"
 2. Close Visual Studio
-3. Stopped IIS Express
+3. Stopped IIS Express in the windows toolbar.  See the below image:
 ![image.png](/.attachments/image-eaed5ac9-0cbc-4918-8459-1d30f162e962.png)
 4. Deleted my .vs folder
 5. Reopened the solution in Visual Studio
 
-## Stale Code when debugging
+### Stale Code when debugging
 
 When I was debugging, I would not see my changes applied to the code.  Even when I made sure my code was getting rebuilt, I would still see an old version without my changes.  This turned out to be because I had added the TypeScript files before I added the `<TypeScriptCompileBlocked />` flag to the .csproj file.  This caused a bunch of stale .js files to be placed alongside the actual .ts and .tsx files.  The .js files were being used instead of the .ts and .tsx files.  I simply deleted all those .js files to fix the issue.
 
-## Publish sometimes misses files in the wwwroot/dist folder
+### Publish sometimes misses files in the wwwroot/dist folder
 
 Since upgrading to webpack v4, it seems that files are written to disc asynchronously.  The MSBuild process configured in the .csproj file wasn't waiting for these files to be written by the `<Exec Command="npm run build:prod" />` command before copying files to the publish directory.  This didn't happen consistently, and after adding `<DistFiles Include="wwwroot\dist\**" />` and `<Delete Files="@(FilesToDelete)" />`, it hasn't happened to me again.  However, it is something to look out for.
 
-## Publish sometimes hangs with thousands of errors
+### Publish sometimes hangs with thousands of errors
 
 Every once in a while, I would encounter a problem where the publish would encounter thousands of errors about being unable to copy certain .dll files.  To address this, I simply stopped the publish with ctrl + break, and tried again.
 
