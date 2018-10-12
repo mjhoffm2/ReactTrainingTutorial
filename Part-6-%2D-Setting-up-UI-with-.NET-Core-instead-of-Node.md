@@ -36,7 +36,7 @@ With this starting template, we are now going to extend it so it can build and h
 
 ### Verify NuGet dependencies
 
-In this project, I will not be using any dependencies except for the ones that were already included in the API template project.  Only 3 are used:
+In this part of the tutorial, I will not be using any dependencies except for the ones that were already included in the API template project.  Only 3 are used:
 
 ![image.png](/.attachments/image-05b3ef5b-0144-448e-89ae-709807500f4d.png)
 
@@ -130,6 +130,8 @@ The important things this is doing:
 1. Installs NPM dependencies the first time we try to build the project.
 2. Cleans and builds the front end in production mode when publishing.
 3. Configures which files to copy and which to ignore for publishing.  In this case, all files in the ClientApp folder will be excluded from the publish.  All files in the wwwroot/dist folder are included in the publish.
+
+Note that this only runs `npm install` if the `node_modules` folder doesn't already exist.  In the future, if you update your npm dependencies, it will not automatically run `npm install` when you debug your application.  You will need to manually run `npm install` from the command line after updating your npm dependencies before you start debugging.
 
 ### Migrate Source Code and Configuration
 
@@ -495,6 +497,42 @@ namespace React_Demo
 	}
 }
 ```
+
+## Try it out
+
+### Development
+
+At this point, you should be able to try debugging your application.  You should already have a working `launchSettings.json` file, but in case you run into problems, here is mine for reference.  The port numbers are arbitrary.
+
+_launchSettings.json_
+```json
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false, 
+    "anonymousAuthentication": true, 
+    "iisExpress": {
+      "applicationUrl": "http://localhost:61802",
+      "sslPort":  44301
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+```
+
+To start running the code to debug it, simply click the green play button at the top that says "IIS Express".
+![image.png](/.attachments/image-6218027b-7f1a-4014-bd9a-b12f5f23ae58.png)
+
+The first time you debug the application, it will need to run `npm install` as we configured in the .csproj file.  This can take a while, so be patient.
+
 
 
 ## Issues I ran into and how to address them
