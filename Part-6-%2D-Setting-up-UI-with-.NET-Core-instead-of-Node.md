@@ -194,6 +194,73 @@ The major changes are:
 1. Removing anything that was only used by the node server running express.  I am keeping the webpack-dev-middleware, since it will still be required later.
 2. I have added the `aspnet-webpack` package, which will also be required later.
 
+_webpack.config.js_
+```js
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+var config = (env, options) => {
+    let isProduction;
+
+    if (env && env.NODE_ENV && env.NODE_ENV !== 'development') {
+        isProduction = true;
+    } else if (options && options.mode === 'production') {
+        isProduction = true;
+    } else {
+        isProduction = false;
+    }
+
+    return {
+        name: 'web',
+        mode: isProduction ? 'production' : 'development',
+        entry: {
+            client: './ClientApp/boot-client.tsx'
+        },
+        output: {
+            path: path.resolve(__dirname, './wwwroot/dist'),
+            publicPath: '/dist/',
+            filename: 'bundle.js'
+        },
+        resolve: {
+            //automatically infer '.ts' and '.tsx' when importing files
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.css$/,
+                    use: isProduction ?
+                        [MiniCssExtractPlugin.loader, 'css-loader'] :
+                        ['style-loader', 'css-loader']
+                },
+                {
+                    test: /\.tsx?$/,
+                    include: path.resolve(__dirname, "./ClientApp/"),
+                    loader: "awesome-typescript-loader"
+                },
+                {
+                    test: /\.(png|jpg|jpeg|gif|svg|ttf|otf|woff|woff2|eot)$/,
+                    loader: 'url-loader?limit=4096'
+                }
+            ]
+        },
+
+        //see https://webpack.js.org/configuration/devtool/ for options
+        devtool: isProduction ? "source-map" : "cheap-module-eval-source-map",
+
+        plugins: isProduction ? [ new MiniCssExtractPlugin() ] : []
+    };
+};
+module.exports = config;
+```
+
+Important changes:
+1. Instead of just checking for `options.mode === 'production'`, we are now also checking `env.NODE_ENV !== 'development'`.  If either of these are true, then we are in production mode.  The reason for this is because from asp.net, we can easily provide the `env` parameter but not the `mode` parameter.
+2. We have completely removed the 'server' configuration, and are now returning only the web configuration.
+3. We are setting the 'mode' field to match the value of `isProduction`.  This is required by webpack v4 when using `env.NODE_ENV` instead of `options.mode`.
+4. Removed the hot module entry point and gave the boot-client entry point the name 'client'.
+5. Adjusted the output to reflect the new output directory and public path.
+6. Removed the hot module replacement plugin during development.
 
 # Issues I ran into and how to address them
 
