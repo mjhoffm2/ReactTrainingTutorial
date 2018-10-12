@@ -268,7 +268,7 @@ Important changes:
 
 ### Webpack Dev Middleware
 
-Just like on the node server, we will be using webpack dev middleware to build and serve our code during development.  This will be configured as part of our HTTP request pipeline in the `Configure` method of our `Startup` class.  Simply add the Webpack Dev Middleware, which is available as part of AspNetCore.SpaServices.
+Just like on the node server, we will be using webpack dev middleware to build and serve our code during development.  This will be configured as part of our HTTP request pipeline in the `Configure` method of our `Startup` class.  Simply add the Webpack Dev Middleware, which is available as part of AspNetCore.SpaServices.  This middleware will run a node server in the background, which will basically do the same thing that our previous node server was doing.
 
 _Startup.cs_
 ```cs
