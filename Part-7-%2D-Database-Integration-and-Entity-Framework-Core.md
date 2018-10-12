@@ -26,4 +26,33 @@ You will also need something like [SQL Server Management Studio](https://docs.mi
 
 To save you some time, I will provide a zip containing two sql scripts to get started: [SlackTraining init sql.zip](/.attachments/SlackTraining%20init%20sql-c82d9fcf-c464-4f68-b037-a2ed32b70f56.zip)
 
-The 'init db' script will create an empty database on the database server called `SlackTraining`.  You could easily make this database yourself if you want.  The other 'init ddl' script will create the four tables you see in the diagram above, as well as the indices and foreign key constraints between them.  The `SlackTraining` database must exist before you run the 'init ddl' script.
+The 'init db' script will create an empty database on the database server called `SlackTraining`.  You could easily make this database yourself if you want.  The other 'init ddl' script will create the four tables you see in the diagram above, as well as the indices and foreign key constraints between them.  The `SlackTraining` database must exist before you run the 'init ddl' script.  You should be able to simply open up SSMS, connect to the local SQL Server Express instance, and run these queries without any additional configuration.
+
+## Create Entity Framework Database Context
+
+### Overview
+
+For this tutorial, I will be using the "database first" approach of first creating the database, and then creating a database context from it.  In this case, I will actually be using a tool which will automatically generate our database context and c# models.  This will be roughly equivalent to the entire DAO layer, if you are familiar with that concept.  This database context and c# models will serve as the interface between our .NET Core application and the SQL database.
+
+### Entity Framework Scaffolding Tool
+
+To generate the Entity Framework database context, we will be using the Entity Framework Scaffolding tool.  This will analyze our database and generate a database context and C# models based on the tables in our SQL database.  It is smart enough to pick up on foreign key constraints, unique keys, data types, and much more to generate an intelligent structure for your database context.
+
+Before we can use it, we need to figure out what connection string we want to use, and where we want the files to be placed.
+
+For this tutorial, I decided on the following file structure:
+![image.png](/.attachments/image-fe8ad13e-e4fa-4e56-852a-f75149473cdf.png)
+
+For now, we can just use windows authentication for the connection string.  This is an authentication scheme that simply uses the fact you are signed in to your local windows account.  To connect to the SlackTraining database on our local SQL Express server using windows authentication, we use the following connection string:
+
+`"Server=.\SQLEXPRESS;Database=SlackTraining;Trusted_Connection=True;"`
+
+If you are using a different server, database, or authentication scheme, you will need to figure out the connection string for that.
+
+With our connection string and our output location, we can now use the scaffolding tool.  In Visual Studio, you can open up the Package Manage Console, and run the following command:
+
+```
+Scaffold-DbContext "Server=.\SQLEXPRESS;Database=SlackTraining;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -o Models/Database -Context SlackTrainingDbEntities -f -d -v
+```
+
+This will build our project, then generate a bunch of files in the `Models/Database` directory.  These files will include a `SlackTrainingDbEntities.cs` file, which will be our Entity Framework Core Database Context.  Please note that within this file, the connection string will be included in the `OnConfiguring` method.  If you put any actual credentials into your connection string when using the scaffolding tool, you should remove them from your code before committing them to source control.
