@@ -57,9 +57,9 @@ _YourProject.csproj_
 </Project>
 ```
 
-In this section, I have also made it so the `node_modules` folder will not show up in Visual Studio when it is created.  A complete .csproj example will be available later, but adding these two properties is completely mandatory before continuing.  If you add any typescript files before adding the `<TypeScriptCompileBlocked />` flag, then JavaScript files will be created which will get picked up by your build instead of your actual TypeScript source code.  This can result in some extremely confusing situations with stale data.
+In this section, I have also made it so the `node_modules` folder will not show up in Visual Studio when it is created.  A complete .csproj is available below, but adding these two properties is completely mandatory before adding any of our front end code.  If you add any typescript files before adding the `<TypeScriptCompileBlocked />` flag, then JavaScript files will be created which will get picked up by your build instead of your actual TypeScript source code.  This can result in some extremely confusing situations with stale data.
 
-Next, we will need to decide our project structure before we can continue.  Here is the project structure that I decided to go with.  In a .NET Core application, the `wwwroot` folder has special meaning, and any files placed in it are publicly accessible.  Additionally, the `Views` folder has special meaning, it will be search through for `cshtml` template files if your project is using 
+Before we can finish updating the .csproj file, we will need to decide our project structure.  Here is the project structure that I decided to go with.  In a .NET Core application, the `wwwroot` folder has special meaning, and any files placed in it are publicly accessible.  Additionally, the `Views` folder has special meaning, it will be searched through for `cshtml` template files, which we will be using to serve our index html page.
 
 ![image.png](/.attachments/image-f1b2cd8f-8f8b-4b94-aaad-9b3d9a885aa3.png)
 
@@ -129,8 +129,94 @@ _YourProject.csproj_
 The important things this is doing:
 1. Installs NPM dependencies the first time we try to build the project.
 2. Cleans and builds the front end in production mode when publishing.
-3. Configures which files to copy and which to ignore for publishing.  In this case, all files in the ClientApp folder will be excluded from the publish.
+3. Configures which files to copy and which to ignore for publishing.  In this case, all files in the ClientApp folder will be excluded from the publish.  All files in the wwwroot/dist folder are included in the publish.
 
 ### Migrate Source Code and Configuration
 
-As far as actually moving the files, we will simply take the contents of the node application's `src/web` folder, and place that in `ClientApp`.  We will not be using the code from the node server.  We will be placing the `webpack.config.js`, `tsconfig.js`, and `package.json` files all in the same directory as the .csproj file.  You can copy the `package-lock.json` file too if you wish, otherwise it will be generated again.  We will need to update our webpack configuration to reflect the new structure (and the lack of a node server), as well as update our dependencies in the `package.json` file. 
+As far as actually moving the files, we will simply take the contents of the node application's `src/web` folder, and place them in the `ClientApp` folder.  We will not be using the code from the node server, or the old .html files.  We will be placing the `webpack.config.js`, `tsconfig.js`, and `package.json` files all in the same directory as the .csproj file.  You can copy the `package-lock.json` file too if you wish, otherwise it will be generated again.  We will need to update our webpack configuration to reflect the new structure (and the lack of a node server), as well as update our dependencies in the `package.json` file.
+
+Here is the updated `package.json` file I am using:
+
+_package.json_
+```json
+{
+  "name": "react-demo",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/.bin/webpack --mode=development",
+    "build:prod": "node_modules/.bin/webpack --mode=production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/es6-promise": "^3.3.0",
+    "@types/react": "^16.4.13",
+    "@types/react-bootstrap": "^0.32.13",
+    "@types/react-dom": "^16.0.7",
+    "@types/react-redux": "^6.0.9",
+    "@types/react-router": "^4.0.30",
+    "@types/react-router-dom": "^4.3.1",
+    "@types/webpack-hot-middleware": "^2.16.4",
+    "aspnet-webpack": "^3.0.0",
+    "awesome-typescript-loader": "^5.2.1",
+    "bootstrap": "^3.3.7",
+    "connected-react-router": "^4.5.0",
+    "css-loader": "^1.0.0",
+    "es6-promise": "^4.2.5",
+    "file-loader": "^2.0.0",
+    "mini-css-extract-plugin": "^0.4.4",
+    "react": "^16.5.0",
+    "react-bootstrap": "^0.32.4",
+    "react-dom": "^16.5.0",
+    "react-hot-loader": "^4.3.11",
+    "react-redux": "^5.0.7",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
+    "redux": "^4.0.0",
+    "style-loader": "^0.23.0",
+    "typescript": "^3.0.3",
+    "url-loader": "^1.1.1",
+    "webpack-dev-middleware": "^3.4.0",
+    "webpack-hot-middleware": "^2.24.3",
+    "whatwg-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.17.2",
+    "webpack-cli": "^3.1.0"
+  }
+}
+```
+
+The major changes are:
+1. Removing anything that was only used by the node server running express.  I am keeping the webpack-dev-middleware, since it will still be required later.
+2. I have added the `aspnet-webpack` package, which will also be required later.
+
+
+# Issues I ran into and how to address them
+
+## Unable to connect to IIS Express
+
+When trying to debug the application for the first time, I got an error about being "unable to connect to web server 'IIS Express'.  I am not sure exactly what caused this and how to fix it, but the issue went away after I did the following.
+
+1. Disable the ssl port in the launch settings by removing the "sslPort" field in "iisExpress"
+2. Close Visual Studio
+3. Stopped IIS Express
+![image.png](/.attachments/image-eaed5ac9-0cbc-4918-8459-1d30f162e962.png)
+4. Deleted my .vs folder
+5. Reopened the solution in Visual Studio
+
+## Stale Code when debugging
+
+When I was debugging, I would not see my changes applied to the code.  Even when I made sure my code was getting rebuilt, I would still see an old version without my changes.  This turned out to be because I had added the TypeScript files before I added the `<TypeScriptCompileBlocked />` flag to the .csproj file.  This caused a bunch of stale .js files to be placed alongside the actual .ts and .tsx files.  The .js files were being used instead of the .ts and .tsx files.  I simply deleted all those .js files to fix the issue.
+
+## Publish sometimes misses files in the wwwroot/dist folder
+
+Since upgrading to webpack v4, it seems that files are written to disc asynchronously.  The MSBuild process configured in the .csproj file wasn't waiting for these files to be written by the `<Exec Command="npm run build:prod" />` command before copying files to the publish directory.  This didn't happen consistently, and after adding `<DistFiles Include="wwwroot\dist\**" />` and `<Delete Files="@(FilesToDelete)" />`, it hasn't happened to me again.  However, it is something to look out for.
+
+## Publish sometimes hangs with thousands of errors
+
+Every once in a while, I would encounter a problem where the publish would encounter thousands of errors about being unable to copy certain .dll files.  To address this, I simply stopped the publish with ctrl + break, and tried again.
+
