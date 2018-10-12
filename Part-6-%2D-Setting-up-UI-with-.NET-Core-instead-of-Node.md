@@ -285,6 +285,92 @@ app.UseStaticFiles();
 
 It is important to make sure that you add this middleware _before_ the call to `app.UseStaticFiles();`.  It is also important that this middleware is only used in development mode.  In this middleware, we have configured hot module replacement to be enabled, as well as specified the value of `env.NODE_ENV` that will be provided to the webpack configuration.
 
+It is also important that the `Startup.cs` file and the `webpack.config.js` file for your project are both located in the same directory as the .csproj file.  While it is possible to provide `ConfigFile` and `ProjectPath` parameters to the webpack dev middleware options, I was not successful in getting these to work properly.  Additionally, there is a `ReactHotModuleReplacement` option, but this doesn't do anything useful as far as I can tell.  The `react-hot-loader` that we use on the front end doesn't require anything special configured on the back end to work.
+
+### Hosting the Index .html Page
+
+Just like on the node server running express, we will need our server to host some kind of .html page which will kick start our react application.  To do this, we will be using .cshtml pages.  If you want to learn more about creating and configuring these templates, you will need to do some googling.  I am just going to dump them here and talk about roughly what they are doing.
+
+My final .cshtml files are as follows
+
+_Views/\_ViewStart.cshtml_
+```
+@{
+    Layout = "_Layout";
+}
+```
+
+_Views/\_ViewImports.cshtml_
+```
+@using test2
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.SpaServices
+```
+
+_Views/Shared/\_Layout.cshtml_
+```
+@inject Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnv
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link id="favicon-shortcut-icon" rel="shortcut icon" href="~/favicon.ico?v=1" type="image/x-icon" />
+    <link id="favicon-icon" rel="icon" href="~/favicon.ico?v=1" type="image/x-icon" />
+    <title>React Demo</title>
+    <base href="~/" />
+    @if (hostingEnv.EnvironmentName != "Development")
+    {
+        <link href="~/dist/client.css" asp-append-version="true" rel="stylesheet">
+    }
+</head>
+<body>
+    @RenderBody()
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+```
+
+_Views/Shared/Error.cshtml_
+```
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="text-danger">Error.</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (!string.IsNullOrEmpty((string)ViewData["RequestId"]))
+{
+    <p>
+        <strong>Request ID:</strong> <code>@ViewData["RequestId"]</code>
+    </p>
+}
+
+<h3>Development Mode</h3>
+<p>
+    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+</p>
+<p>
+    <strong>Development environment should not be enabled in deployed applications</strong>, as it can result in sensitive information from exceptions being displayed to end users. For local debugging, development environment can be enabled by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>, and restarting the application.
+</p>
+```
+
+_Views/Home/Index.cshtml_
+```
+<div id="root">Loading...</div>
+
+@section scripts {
+    <script src="~/dist/bundle.js" asp-append-version="true"></script>
+}
+```
+
+The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.
+
+Note that in the `_Layout.cshtml` file, we are checking to see if the current environment is "Development" or not.  In any environment other than local debugging, we will need to include our .css source file separately.  If you recall from [Part 5 - Bundling for Production](/Part-5-%2D-Bundling-for-Production), in the section about separating css, we needed to provide two separate .html files due to the fact that our .css stylesheets are included inline in development, and as a separate `main.css` file in production.  In our new build process using .NET Core, we have a similar situation.  The main differences are that we are checking the environment directly in the template instead of having separate .html files, and our stylesheet will be called `client.css` due to the fact that is how we named the entry point in the webpack configuration.
+
+
 
 ## Issues I ran into and how to address them
 
