@@ -293,7 +293,7 @@ It is also important that the `Startup.cs` file and the `webpack.config.js` file
 
 Just like on the node server running express, we will need our server to host some kind of .html page which will kick start our react application.  To do this, we will be using .cshtml pages.  If you want to learn more about creating and configuring these templates, you will need to do some googling.  I am just going to dump them here and talk about roughly what they are doing.
 
-My final .cshtml files are as follows
+My final .cshtml files are as follows:
 
 _Views/\_ViewStart.cshtml_
 ```
