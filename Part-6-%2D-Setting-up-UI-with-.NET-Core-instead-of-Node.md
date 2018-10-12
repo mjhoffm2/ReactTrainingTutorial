@@ -302,7 +302,7 @@ _Views/\_ViewStart.cshtml_
 
 _Views/\_ViewImports.cshtml_
 ```
-@using test2
+@using React_Demo
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Microsoft.AspNetCore.SpaServices
 ```
@@ -367,7 +367,7 @@ _Views/Home/Index.cshtml_
 ```
 ![image.png](/.attachments/image-e572aa55-94fb-493c-b75b-e2be9ff5b7d8.png)
 
-The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.  Make sure that you use the correct namespace in the `_ViewImports.cshtml_` file, since you probably didn't name your project 'test2'.
+The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.  Make sure that you use the correct namespace in the `_ViewImports.cshtml_` file, since you probably didn't name your project 'React Demo'.
 
 Note that in the `_Layout.cshtml` file, we are checking to see if the current environment is "Development" or not.  In any environment other than local debugging, we will need to include our .css source file separately.  If you recall from [Part 5 - Bundling for Production](/Part-5-%2D-Bundling-for-Production), in the section about separating css, we needed to provide two separate .html files due to the fact that our .css stylesheets are included inline in development, and as a separate `main.css` file in production.  In our new build process using .NET Core, we have a similar situation.  The main differences are that we are checking the environment directly in the template instead of having separate .html files, and our stylesheet will be called `client.css` due to the fact that is how we named the entry point in the webpack configuration.
 
@@ -378,7 +378,7 @@ _HomeController.cs_
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace test2.Controllers
+namespace React_Demo.Controllers
 {
 	public class HomeController : Controller
 	{
@@ -402,7 +402,7 @@ namespace test2.Controllers
 }
 ```
 
-Again, make sure to correct the namespace since you probably didn't name your project 'test2'.
+Again, make sure to correct the namespace since you probably didn't name your project 'React Demo'.
 
 Finally, we need to hook up this controller to our HTTP request pipeline.  We will do this by adding the MVC middleware at the end of our request pipeline in the `Configure` method of our `Startup.cs` class.
 
@@ -435,7 +435,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 
-namespace test2
+namespace React_Demo
 {
 	public class Startup
 	{
@@ -457,6 +457,7 @@ namespace test2
 		{
 			if (env.IsDevelopment())
 			{
+				app.UseExceptionHandler("/Error");
 				app.UseDeveloperExceptionPage();
 			}
 			else
@@ -472,8 +473,7 @@ namespace test2
 				app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
 				{
 					HotModuleReplacement = true,
-					EnvParam = new { NODE_ENV = "development" },
-					
+					EnvParam = new { NODE_ENV = "development" }
 				});
 			}
 
@@ -522,3 +522,9 @@ Since upgrading to webpack v4, it seems that files are written to disc asynchron
 
 Every once in a while, I would encounter a problem where the publish would encounter thousands of errors about being unable to copy certain .dll files.  To address this, I simply stopped the publish with ctrl + break, and tried again.
 
+
+## Download Source
+
+The source code up to this point can be found here:
+
+https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-6
