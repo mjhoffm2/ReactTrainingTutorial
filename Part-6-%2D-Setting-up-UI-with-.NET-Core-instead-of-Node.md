@@ -531,7 +531,62 @@ _launchSettings.json_
 To start running the code to debug it, simply click the green play button at the top that says "IIS Express".
 ![image.png](/.attachments/image-6218027b-7f1a-4014-bd9a-b12f5f23ae58.png)
 
-The first time you debug the application, it will need to run `npm install` as we configured in the .csproj file.  This can take a while, so be patient.
+The first time you debug the application, it will need to run `npm install` as we configured in the .csproj file.  This can take a while, so be patient.  Additionally, you will probably be asked to install an ssl security certificate for your localhost.
+
+Eventually, a new chrome window will open up, and you will see the application running.
+
+![image.png](/.attachments/image-dc5e3e51-3159-4e6a-b2b0-d73281ffd939.png)
+
+You can test out hot module reloading by making a change to the source code, and seeing the changes appear immediately in your browser.
+
+![image.png](/.attachments/image-e156d5b6-1295-4247-a06e-be1459d2edc7.png)
+
+Your react state should also be preserved.
+
+Closing this window will stop the debugger, and stopping the debugger will close this window.
+
+### Publishing
+
+Most of the difficult configuration for publishing is already taken care of in the .csproj file that I provided.  If you run into other issues, you will need to do some googling.
+
+To get started, right click on your project and select 'Publish...'
+![image.png](/.attachments/image-0df45af7-617a-4bf4-8c79-2d3acbf4c3e9.png)
+
+Choose the 'Folder' target
+![image.png](/.attachments/image-614541cb-30e2-40ff-bf71-66ea635fcc30.png)
+
+Before creating the profile, I recommend clicking the 'Advanced...' button and applying the following settings:
+![image.png](/.attachments/image-a5f206d1-3e2d-41f0-a474-7e95f4431c4f.png)
+
+When you finish creating the profile, you should see something like this:
+![image.png](/.attachments/image-ebf764e1-024a-4d3a-aa26-79ac0ef3b570.png)
+
+At this point, you can go ahead and click the 'Publish' button.  When it finishes, you can head over to the folder you selected for publishing.  In this example, that folder is `React Demo\bin\Release\netcoreapp2.1\publish`.  From there, you can open up a command prompt and do the following:
+1. Set the ASPNETCORE_ENVIRONMENT variable to something other than 'Development'.  This will have defaulted to 'Production' if you didn't set anything, so you likely don't need to do anything.
+2. Run the .exe that was generated for your project.  In this example, the exe is `React Demo.exe`.  You should see something like the following:
+
+```ps
+> $env:ASPNETCORE_ENVIRONMENT = "Staging"
+> & '.\React Demo.exe'
+
+Hosting environment: Staging
+Content root path: C:\Users\Matt Hoffman\git\react-demo\.net core 2.1\React Demo\bin\Release\netcoreapp2.1\publish
+Now listening on: http://localhost:5000
+Now listening on: https://localhost:5001
+Application started. Press Ctrl+C to shut down.
+```
+
+In this example, port 5001 is the secure port, so a request to localhost:5000 should get redirected to localhost:5001.  You can open up your browser to one of these and take a look at the application working.  If you take a look at the network tab, you should see something like this:
+
+![image.png](/.attachments/image-16b99a40-e65c-4293-b3a5-db4cb41c6d7c.png)
+
+Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  This will be out of scope for this tutorial.
+
+
+
+
+
+
 
 
 
