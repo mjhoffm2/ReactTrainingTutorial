@@ -557,6 +557,7 @@ Choose the 'Folder' target
 
 Before creating the profile, I recommend clicking the 'Advanced...' button and applying the following settings:
 ![image.png](/.attachments/image-a5f206d1-3e2d-41f0-a474-7e95f4431c4f.png)
+Doing a self-contained deployment is not optimal, but it reduces the number of things that could go wrong with the deployment.
 
 When you finish creating the profile, you should see something like this:
 ![image.png](/.attachments/image-ebf764e1-024a-4d3a-aa26-79ac0ef3b570.png)
@@ -581,14 +582,6 @@ In this example, port 5001 is the secure port, so a request to localhost:5000 sh
 ![image.png](/.attachments/image-16b99a40-e65c-4293-b3a5-db4cb41c6d7c.png)
 
 Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  This will be out of scope for this tutorial.
-
-
-
-
-
-
-
-
 
 ## Issues I ran into and how to address them
 
@@ -621,3 +614,5 @@ Every once in a while, I would encounter a problem where the publish would encou
 The source code up to this point can be found here:
 
 https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-6
+
+The code for this part of the tutorial can be found in the `.net core 2.1` folder.
