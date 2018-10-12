@@ -365,11 +365,64 @@ _Views/Home/Index.cshtml_
     <script src="~/dist/bundle.js" asp-append-version="true"></script>
 }
 ```
+![image.png](/.attachments/image-e572aa55-94fb-493c-b75b-e2be9ff5b7d8.png)
 
-The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.
+The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.  Make sure that you use the correct namespace in the `_ViewImports.cshtml_` file, since you probably didn't name your project 'test2'.
 
 Note that in the `_Layout.cshtml` file, we are checking to see if the current environment is "Development" or not.  In any environment other than local debugging, we will need to include our .css source file separately.  If you recall from [Part 5 - Bundling for Production](/Part-5-%2D-Bundling-for-Production), in the section about separating css, we needed to provide two separate .html files due to the fact that our .css stylesheets are included inline in development, and as a separate `main.css` file in production.  In our new build process using .NET Core, we have a similar situation.  The main differences are that we are checking the environment directly in the template instead of having separate .html files, and our stylesheet will be called `client.css` due to the fact that is how we named the entry point in the webpack configuration.
 
+Next, we need to actually tell our application when to serve the page.  We need a controller that will serve it.  We will create a `HomeController.cs` file in the `Controllers` folder to do this.
+
+_HomeController.cs_
+```cs
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+
+namespace test2.Controllers
+{
+	public class HomeController : Controller
+	{
+
+		public HomeController()
+		{
+
+		}
+		
+		public IActionResult Index()
+		{
+			return View();
+		}
+
+		public IActionResult Error()
+		{
+			ViewData["RequestId"] = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+			return View();
+		}
+	}
+}
+```
+
+Again, make sure to correct the namespace since you probably didn't name your project 'test2'.
+
+Finally, we need to hook up this controller to our HTTP request pipeline.  We will do this by adding the MVC middleware at the end of our request pipeline in the `Configure` method of our `Startup.cs` class.
+
+_Startup.cs_
+```cs
+app.UseMvc(routes =>
+{
+	routes.MapRoute(
+		name: "default",
+		template: "{controller}/{action=Index}/{id?}");
+
+	//If no server route matched, assume that this is a route handled by the client side router in the react app
+	//Note: urls that look like static resources will not be handled by this, such as urls that end in file extensions
+	routes.MapSpaFallbackRoute(
+		name: "spa-fallback",
+		defaults: new { controller = "Home", action = "Index" });
+});
+```
+
+The first call to `routes.MapRoute` will configure our api routes, which we will set up in a later part of the tutorial.  The following call to `routes.MapSpaFallbackRoute` will invoke our HomeController and serve our .html page for any routes that aren't handled by the api controllers.  Note that this will also skip routes that look like static files, just like we had configured previously on the node server running express.
 
 
 ## Issues I ran into and how to address them
