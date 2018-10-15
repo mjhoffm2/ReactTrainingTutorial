@@ -728,4 +728,4 @@ Additional steps that we could take include:
 
 ## Download Source
 
-https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-5
+https://github.com/mjhoffm2/react-demo/tree/Part-5
