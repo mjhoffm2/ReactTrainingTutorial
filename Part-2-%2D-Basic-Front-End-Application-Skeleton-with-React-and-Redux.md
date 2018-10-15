@@ -316,7 +316,9 @@ export * from './stateDefinitions';
 ```
 
 For this tutorial, I will place these files in a `definitions` folder inside the `src/web` directory:
+
 ![image.png](/.attachments/image-08680fef-6893-4988-ade7-3a551a40e675.png)
+
 You can disregard the `actions` folder and `preferences.ts` file for now.
 
 ### The Actions
@@ -350,6 +352,7 @@ We will dispatch these actions after completing some kind of load.  The actions 
 Again, it is important to understand that the code above is still just type definitions, and no JavaScript will actually get created from it (enums can optionally be represented as runtime objects).
 
 For this tutorial, I will place everything related to Redux actions in an `actions` folder located in the `src/web` directory:
+
 ![image.png](/.attachments/image-4d9e60f8-0397-4a03-adc3-d392123de82e.png)
 
 
@@ -438,6 +441,7 @@ export const rootReducer = combineReducers<defs.State, Action>({
 In this example, we have one reducer which is only concerned with the `users` part of the state, and another reducer which is only concerned with the `channels` part of the state.  These two separate reducers are then composed together into one `rootReducer` using the `combineReducers` utility.  This may look like overkill in our simple application so far, but as your application grows and the state becomes more deeply nested and complex, this is a good way to organize your code.
 
 For this tutorial, I will place everything related to Redux reducers in a `reducers` folder located in the `src/web` directory:
+
 ![image.png](/.attachments/image-731d54c7-5a80-4899-9431-618b100e0c3e.png)
 
 ### The Store
@@ -473,6 +477,7 @@ You can read more information from the official documentation: https://github.co
 Let's make a new React component called `ChannelListComponent`.  This component will render all the channels in the Redux store, and will also be in charge of loading them.
 
 For this tutorial, I will place this component in a file called `Channels.tsx` located in the `components` folder:
+
 ![image.png](/.attachments/image-29db764c-792d-4230-9b57-bdc777f1c676.png)
 
 To get starting creating our component, we will define a couple of interfaces.  First we need to define an interface for the props that we will receive from the parent component.  In this case, we don't need any parameters from the parent component.
