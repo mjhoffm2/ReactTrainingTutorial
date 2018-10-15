@@ -1,8 +1,8 @@
-[[_TOC_]]
+# Part 7 - Database Integration and Entity Framework Core
 
 ## Overview
 
-This part of the tutorial is continued from [Part 6 - Setting up UI with .NET Core instead of Node](/Part-6-%2D-Setting-up-UI-with-.NET-Core-instead-of-Node).  However, it is not necessary to have followed the tutorial up to this point.  The only prerequisite for this part of the tutorial will be to have some sort of .NET Core application already set up.
+This part of the tutorial is continued from [Part 6 - Setting up UI with .NET Core instead of Node](/Part-6-%252D-Setting-up-UI-with-.NET-Core-instead-of-Node.md).  However, it is not necessary to have followed the tutorial up to this point.  The only prerequisite for this part of the tutorial will be to have some sort of .NET Core application already set up.
 
 In this part of the tutorial will be going over setting up a sql database for our Slack Training App, using that to create an Entity Framework Database Context.  We will also be going over the configuration for how to connect to our database, as well as creating some example service calls using Entity Framework Core.  The process for starting with a sql database, and creating a C# database context from it is referred to as the "database first" approach.  The alternative is referred to as "code first", which is a valid approach but I will not be going over it in this tutorial.
 
@@ -14,7 +14,7 @@ For this part of the tutorial, we will set up a very simple database with just 4
 
 ![image.png](/.attachments/image-521990cf-e13f-46e2-820f-8f75f57dcc42.png)
 
-For more information about the model we will be using, please see [Slack Training App - Tutorial Overview](/Slack-Training-App-%2D-Tutorial-Overview).
+For more information about the model we will be using, please see [Slack Training App - Tutorial Overview](/Slack-Training-App-%252D-Tutorial-Overview.md).
 
 ### Getting Required Tools
 
