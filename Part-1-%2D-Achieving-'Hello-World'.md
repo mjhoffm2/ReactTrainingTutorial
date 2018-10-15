@@ -1,18 +1,18 @@
-[[_TOC_]]
+# Part 1 - Achieving 'Hello World'
 
-# Overview
+## Overview
 
 This tutorial is intended as a new developer's guide to setting up the basics to get started developing a react application.  This application will be written in TypeScript, and will be built using Webpack.  In this project, I will be using a node server running express.  However, this guide is mostly independent of the actual server architecture used.  I chose node because it requires very little configuration, and because we will already need to use it to run webpack.
 
-# Prerequisites
+## Prerequisites
 
 Before starting this tutorial, you should make sure to install npm with Node 8+.  You can get both from here: https://www.npmjs.com/get-npm
 
 You should also use an IDE with TypeScript support.  Visual Studio, Eclipse, and IntelliJ all have extensions for TypeScript.  For this project, if you are not already using one of these IDEs, I recommend using either VSCode or WebStorm.  Both require little to no additional configuration, and have excellent TypeScript support.
 
-# Initialize the project
+## Initialize the project
 
-## The package.json
+### The package.json
 
 Initialize the project with a package.json file in the root directory.  This can be done by using the command `npm init -y` to create a default package.json file and then installing individual dependencies.
 
@@ -57,7 +57,7 @@ _package.json_
 
 With a console open to the same folder that the package.json is located in, run `npm install` to download all the required dependencies.
 
-## The tsconfig.json
+### The tsconfig.json
 
 Next, we need to set up a tsconfig.json file.  This will be used by the TypeScript compiler to convert the TypeScript we write into JavaScript.  Most IDEs will also use this for syntax highlighting and improved code completion.  Again, I will provide a minimal starting version to save time:
 
@@ -94,7 +94,7 @@ _tsconfig.json_
 
 One important thing that this tsconfig is doing is defining how modules are going to be hooked up.  By default, the TypeScript compiler will output CommonJS modules.  While these will work just fine, they prevent webpack from performing important tree-shaking optimizations.  Therefore, it is important to make sure that ES6 modules are used instead.  ES6 modules are used by default when ES6+ is set as the target, but in this case we are using the default ES3 target for the TypeScript compiler.
 
-## The webpack.config.js
+### The webpack.config.js
 
 The last initialization related file we will need is the webpack.config.js file.  This is used to configure our webpack build process.  This involves things like setting up the entry point, output files, and the loaders used to process each type of file.  Before we can create it, we will need to decide something about our project structure.  Here is the folder structure that I will be using for this tutorial:
 
@@ -148,7 +148,7 @@ The important things that the webpack configuration is doing is:
 
 More information about configuring webpack can be found from the official documentation: https://webpack.js.org/configuration/
 
-## The main.html
+### The main.html
 
 We will also need an html file, which we will name `main.html` and place in the `public` folder:
 
@@ -172,7 +172,7 @@ Make sure that the location of the main.html file and the location of the bundle
 
 ![image.png](/.attachments/image-06bf3cc5-c359-49d3-98db-da7fbb879bc4.png)
 
-# Create the React App
+## Create the React App
 
 Our front end will be implemented using React, but for this part of the tutorial we will only go as far as printing out "Hello World" to the dom.  To accomplish this, we will create two .tsx files.  A .tsx is the file extension for a TypeScript file with JSX syntax enabled.
 
@@ -216,11 +216,11 @@ Based on the client (web) part of our webpack.config.json file, boot-client.tsx 
 
 We can now build our front end code by running `npm run build` in the console.  After that, you should be able to open the main.html file in a web browser and see the app in action.
 
-# Setting up the server
+## Setting up the server
 
 Just opening up the application as a static file in a web browser isn't going to cut it going forward, so let's set up a server to actually serve the bundle.  Since we are already using TypeScript for the front end, we will be using it for the server as well.  We will need to update our configuration to support this.
 
-## Update the webpack.config.js
+### Update the webpack.config.js
 
 We will update the existing webpack.config.js we already have to include a new server configuration.
 
@@ -297,7 +297,7 @@ We have separate configurations for the server and the client, since we need to 
 
 We could also use separate tsconfig.json files for both the server and the client.  I have tried this before and it works well, but I have also found that IDE's tend to not pick up the correct one.  Therefore, we will just be using the one generic tsconfig file.  The downside is that TypeScript will transpile our code into ES3 JavaScript instead of ES6+, and we cannot separately declare the libraries that are available.
 
-## Server Code
+### Server Code
 
 We will configure our server to run from port 3000 on our localhost, and will serve the static main.html file when a user requests the "/" url.  The following code will accomplish this:
 
@@ -363,7 +363,7 @@ function onListening(): void {
 
 Since node doesn't natively understand TypeScript, we have included this as a part of our webpack build process.  Webpack will convert the TypeScript code into JavaScript that node can understand and run.  Now, when you run `npm run build` in the console, you should find that in addition to the client being compiled into a `bundle.js` file, the server code will be built into the build folder as `main.js`.
 
-# Running the demo
+## Running the demo
 
 We can now run the 2 following commands to compile our code and run the server
 
