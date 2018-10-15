@@ -1,9 +1,8 @@
-[[_TOC_]]
-
+# Part 4 - Improving the Development Experience
 
 ## Overview
 
-This part of the tutorial is continued from [Part 3 - Basic Front End Application Skeleton with React-Router and React-Bootstrap](/Part-3-%2D-Basic-Front-End-Application-Skeleton-with-React%2DRouter-and-React%2DBootstrap), but it should be applicable to any similarly built application.  Much of the code in this part of the application will be specific to the node server we have configured.
+This part of the tutorial is continued from [Part 3 - Basic Front End Application Skeleton with React-Router and React-Bootstrap](/Part-3-%252D-Basic-Front-End-Application-Skeleton-with-React%252DRouter-and-React%252DBootstrap.md), but it should be applicable to any similarly built application.  Much of the code in this part of the application will be specific to the node server we have configured.
 
 In this part of the tutorial, we will be hooking up and implementing a couple of features to make developing the application easier and faster.
 
@@ -19,7 +18,7 @@ There are a couple of options that I chose for the earlier parts of this tutoria
 
 ### tsconfig.json
 
-First, we will switch the tsconfig `lib` option to include `es6`.  Since we are using the same tsconfig.json file for both the server, and the client, it is inconvenient to limit ourselves to es5 code on the server.  Additionally, some third party type definitions will reference things like 'Map' and 'Set', which are only available in es6.  For more information about the consequences of changing this option, please review the section about polyfills on [Part 2 - Basic Front End Application Skeleton with React and Redux](/Part-2-%2D-Basic-Front-End-Application-Skeleton-with-React-and-Redux).
+First, we will switch the tsconfig `lib` option to include `es6`.  Since we are using the same tsconfig.json file for both the server, and the client, it is inconvenient to limit ourselves to es5 code on the server.  Additionally, some third party type definitions will reference things like 'Map' and 'Set', which are only available in es6.  For more information about the consequences of changing this option, please review the section about polyfills on [Part 2 - Basic Front End Application Skeleton with React and Redux](/Part-2-%252D-Basic-Front-End-Application-Skeleton-with-React-and-Redux.md).
 
 _tsconfig.json_
 ```js
