@@ -1,8 +1,8 @@
-[[_TOC_]]
+# Part 5 - Bundling for Production
 
 ## Overview
 
-This part of the tutorial is continued from [Part 4 - Improving the Development Experience](/Part-4-%2D-Improving-the-Development-Experience).
+This part of the tutorial is continued from [Part 4 - Improving the Development Experience](/Part-4-%252D-Improving-the-Development-Experience.md).
 
 After everything is said and done, we still need to be able to ship some quality code.  If you have been following the tutorial exactly up to this point, you may have noticed that our bundle is about 5.57 MB when built with `--mode=development`.  However, when built with `--mode=production`, the bundle is still about 2.25 MB.  This is way too large, so we are going to need to address this.
 
