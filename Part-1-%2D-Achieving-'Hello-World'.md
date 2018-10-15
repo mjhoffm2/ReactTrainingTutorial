@@ -442,3 +442,5 @@ This lets us use `npm run host` instead of `node ./build/main.js` in the console
 
 ## Download Source
 The complete code for this part of the tutorial can be found here: https://github.com/mjhoffm2/react-demo/tree/Part-1
+
+Up next: [Part 2 - Basic Front End Application Skeleton with React and Redux](/Part-2-%252D-Basic-Front-End-Application-Skeleton-with-React-and-Redux.md)
