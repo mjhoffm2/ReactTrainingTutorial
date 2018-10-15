@@ -169,6 +169,7 @@ _main.html_
 This simply creates a single html element for react to mount to, and includes the bundle created by webpack as a script.
 
 Make sure that the location of the main.html file and the location of the bundle.js file (to be generated) are set up correctly.
+
 ![image.png](/.attachments/image-06bf3cc5-c359-49d3-98db-da7fbb879bc4.png)
 
 # Create the React App
