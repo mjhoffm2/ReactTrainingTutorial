@@ -876,4 +876,4 @@ Listening on port 3000
 
 
 ### Download Source
-The complete code for this part of the tutorial can be found here: https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-2
+The complete code for this part of the tutorial can be found here: https://github.com/mjhoffm2/react-demo/tree/Part-2
