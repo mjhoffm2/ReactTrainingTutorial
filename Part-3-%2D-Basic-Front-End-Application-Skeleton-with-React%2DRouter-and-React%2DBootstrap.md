@@ -936,7 +936,7 @@ _boot-client.tsx_
 import 'bootstrap/dist/css/bootstrap.css'
 ```
 
-We already have rules in webpack which tells it how to handle the css.  In this case, the bootstrap stylesheet will be put in the JavaScript bundle as a string.  This is not great for the size of our bundle, but that is something we can deal with later.  However, the bootstrap css references some static files that we do not have rules configured in webpack to handle.  We will add a rule targeting images and fonts using the `url-loader`.  This loader will include these resources directly in our JavaScript bundle as a base 64 string.  We can also provide a `limit` parameter, which limits how large a resource can be before it won't be included in the bundle.  In this case, any images or fonts which are larger than 25 kb will be kept as separate files and output into to the `public/build` folder.
+We already have rules in webpack which tell it how to handle the css.  In this case, the bootstrap stylesheet will be put in the JavaScript bundle as a string.  This is not great for the size of our bundle, but that is something we can deal with later.  However, the bootstrap css references some static files that we do not have rules configured in webpack to handle.  We will add a rule targeting images and fonts using the `url-loader`.  This loader will include these resources directly in our JavaScript bundle as a base 64 string.  We can also provide a `limit` parameter, which limits how large a resource can be before it won't be included in the bundle.  In this case, any images or fonts which are larger than 25 kb will be kept as separate files and output into to the `public/build` folder.
 
 ```js
         ...
