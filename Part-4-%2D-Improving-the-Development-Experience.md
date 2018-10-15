@@ -738,3 +738,5 @@ You will see the text turn red, without reloading the component itself.
 ## Download Source
 
 https://github.com/mjhoffm2/react-demo/tree/Part-4
+
+Up Next: [Part 5 - Bundling for Production](/Part-5-%252D-Bundling-for-Production.md)
