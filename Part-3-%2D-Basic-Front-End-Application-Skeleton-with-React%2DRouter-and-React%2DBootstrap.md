@@ -1051,3 +1051,5 @@ npm run host
 
 ## Download Source
 https://github.com/mjhoffm2/react-demo/tree/Part-3
+
+Up Next: [Part 4 - Improving the Development Experience](/Part-4-%2D-Improving-the-Development-Experience)
