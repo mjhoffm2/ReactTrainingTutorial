@@ -1,8 +1,8 @@
-[[_TOC_]]
+# Part 2 - Basic Front End Application Skeleton with React and Redux
 
 ## Overview
 
-This part of the tutorial is continued from [Part 1 - Achieving 'Hello World'](/Part-1-%2D-Achieving-'Hello-World').
+This part of the tutorial is continued from [Part 1 - Achieving 'Hello World'](/Part-1-%252D-Achieving-'Hello-World'.md).
 
 In this part of the tutorial, we will be hooking up various frameworks to our front end application, and learning how to use them.  While we will not be implementing any real features, we will still be laying the groundwork for how these frameworks will be used in our application.  This will serve as a foothold for more interesting  features as they are implemented.  For now, most of our components will be example components, and our build process is going to be sub-optimal.  Those things will come later.
 
@@ -304,7 +304,7 @@ export interface Channel {
 }
 ```
 
-In the above code, we have defined an interface called `State` which describes an object with two properties, `users` and `channels`.  Each of these properties can either contain `null`, or contain an array of a corresponding object, the interfaces for which are defined in the same code.  These interfaces are based on the requirements for the [Slack Training App](/Slack-Training-App-%2D-Tutorial-Overview), but we could have chosen to design our state in any way we saw fit for the purposes of this part of the tutorial.
+In the above code, we have defined an interface called `State` which describes an object with two properties, `users` and `channels`.  Each of these properties can either contain `null`, or contain an array of a corresponding object, the interfaces for which are defined in the same code.  These interfaces are based on the requirements for the [Slack Training App](/Slack-Training-App-%252D-Tutorial-Overview.md), but we could have chosen to design our state in any way we saw fit for the purposes of this part of the tutorial.
 
 As a reminder, this code is merely a type definition, no JavaScript will actually get created from it.
 
