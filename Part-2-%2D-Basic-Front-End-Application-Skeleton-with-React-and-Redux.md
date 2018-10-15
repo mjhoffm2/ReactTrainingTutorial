@@ -877,3 +877,5 @@ Listening on port 3000
 
 ### Download Source
 The complete code for this part of the tutorial can be found here: https://github.com/mjhoffm2/react-demo/tree/Part-2
+
+Up next: [Part 3 - Basic Front End Application Skeleton with React-Router and React-Bootstrap](/Part-3-%252D-Basic-Front-End-Application-Skeleton-with-React%252DRouter-and-React%252DBootstrap.md)
