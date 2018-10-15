@@ -45,6 +45,7 @@ export const Routes = () =>
 
 ```
 ![image.png](/.attachments/image-d66576cd-9125-45a0-a402-bcd3818bbd50.png)
+
 Disregard the `ViewChannel.tsx` file for now.
 
 The `Routes` component above defines some rules for how urls will be matched to react components.  In this case, we have set up the `Home` component to be rendered when the url path is exactly `/`.  Next, we have set up the `ChannelList` component to be rendered when the url path starts with `/channels`.  Finally, any routes that did not match will be redirected to `/`.
