@@ -614,6 +614,6 @@ Every once in a while, I would encounter a problem where the publish would encou
 
 The source code up to this point can be found here:
 
-https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-6
+https://github.com/mjhoffm2/react-demo/tree/Part-6
 
 The code for this part of the tutorial can be found in the `.net core 2.1` folder.
