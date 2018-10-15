@@ -4,7 +4,7 @@
 
 Parts 1-5 of this tutorial are intended as a new developer's guide to setting up the basics to get started developing a react application.  This application will be written in TypeScript, and will be built using Webpack.  In this project, I will be using a node server running express.  However, the first few parts of this guide are mostly independent of the actual server architecture used.  I chose node because it requires very little configuration, and because we will already need to use it to run webpack.
 
-The goal of this tutorial series is to provide a complete working application with minimal black-boxing and full explanations on what is going on at each step.  It will be targeted at being as generally applicable as possible, so developers do not have to follow the tutorial to find it useful.  As a result, this tutorial will not be using react-react-app, and will go into a lot of detail about what different configuration options do and getting the configuration correct.  While the tutorial will be as general as possible, it will still demonstrate several frameworks and how to integrate them into the react application.
+The goal of this tutorial series is to provide a complete working application with minimal black-boxing and full explanations on what is going on at each step.  It will be targeted at being as generally applicable as possible, so developers do not have to follow the tutorial to find it useful.  As a result, this tutorial will not be using react-react-app, and will go into more detail about what different configuration options do and getting the configuration correct.  While the tutorial will be as general as possible, it will still demonstrate several frameworks and how to integrate them into the react application.
 
 At the end of each part of the tutorial will be a link to a branch on a github repository with a full working example for the code discussed on the page.  In addition to being a learning resource, the secondary goal of this tutorial is to provide a high quality template from which to start building applications from.  However, it is still recommended to actually code along with the tutorial in a separate project so you don't miss learning important details because you just downloaded the example codebase.
 
@@ -100,7 +100,7 @@ One important thing that this tsconfig is doing is defining how modules are goin
 
 ### The webpack.config.js
 
-The last initialization related file we will need is the webpack.config.js file.  This is used to configure our webpack build process.  This involves things like setting up the entry point, output files, and the loaders used to process each type of file.  Before we can create it, we will need to decide something about our project structure.  Here is the folder structure that I will be using for this tutorial:
+The last initialization related file we will need is the webpack.config.js file.  This is used to configure our webpack build process.  This involves things like setting up the entry point, output files, and the loaders used to process each type of file.  I could create an entire tutorial series just about configuring webpack, but for this part of the tutorial we will  go over the bare minimum.  I encourage you to do plenty of research into understanding webpack and configuring it.  Before we can create the `webpack.config.js` file, we will need to decide something about our project structure.  Here is the folder structure that I will be using for this tutorial:
 
 ![image.png](/.attachments/image-df1364c9-dfaa-4fae-9cf4-58315d0cf16c.png)
 
@@ -144,10 +144,10 @@ module.exports = config;
 ```
 
 The important things that the webpack configuration is doing is:
-1. Define the entry point.
-2. Define the loaders that will be used for different files.
-3. Configure how the final JavaScript bundle will be put together.
-4. Define the output location and name.
+1. Define the entry point.  Webpack will use this as the starting point when analyzing your application.  Any files or dependencies which aren't used from your entry point will be ignored.
+2. Define the loaders that will be used for different files.  A loader determines how webpack will handle different dependencies, and you can chain together multiple loaders to combine them.  In this example, all the .css files will first be processed by the 'css-loader', and then the output of the 'css-loader' will be processed by the 'style-loader'.  Plain JavaScript dependencies do not need a loader.
+3. Configure how the final JavaScript bundle will be put together.  In this case, it will be put together to run in a browser (default).
+4. Define the output location and name.  In this case, all output files will be placed in the `public/build` folder, and the main bundle will be called `bundle.js`.
 5. Enabled the "source-map" devtool, which will allow a browser to map compiled JavaScript code back to the TypeScript source.  This is very useful when trying to debug runtime errors in your code.
 
 More information about configuring webpack can be found from the official documentation: https://webpack.js.org/configuration/
