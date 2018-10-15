@@ -1,8 +1,8 @@
-[[_TOC_]]
+# Part 6 - Setting up UI with .NET Core instead of Node
 
 ## Overview
 
-This part of the tutorial is continued from [Part 5 - Bundling for Production](/Part-5-%2D-Bundling-for-Production).
+This part of the tutorial is continued from [Part 5 - Bundling for Production](/Part-5-%252D-Bundling-for-Production.md).
 
 So far, we have set up our project to be served from a Node server running Express.  We haven't actually implemented any business logic using this server yet, we just use it to serve files and support hot module replacement.  In this part of the tutorial, I will be going over how to accomplish the same thing using .NET Core, and will be migrating the existing UI code to that project.
 
@@ -372,7 +372,7 @@ _Views/Home/Index.cshtml_
 
 The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.  Make sure that you use the correct namespace in the `_ViewImports.cshtml_` file, since you probably didn't name your project 'React Demo'.
 
-Note that in the `_Layout.cshtml` file, we are checking to see if the current environment is "Development" or not.  In any environment other than local debugging, we will need to include our .css source file separately.  If you recall from [Part 5 - Bundling for Production](/Part-5-%2D-Bundling-for-Production), in the section about separating css, we needed to provide two separate .html files due to the fact that our .css stylesheets are included inline in development, and as a separate `main.css` file in production.  In our new build process using .NET Core, we have a similar situation.  The main differences are that we are checking the environment directly in the template instead of having separate .html files, and our stylesheet will be called `client.css` due to the fact that is how we named the entry point in the webpack configuration.
+Note that in the `_Layout.cshtml` file, we are checking to see if the current environment is "Development" or not.  In any environment other than local debugging, we will need to include our .css source file separately.  If you recall from [Part 5 - Bundling for Production](/Part-5-%252D-Bundling-for-Production.md), in the section about separating css, we needed to provide two separate .html files due to the fact that our .css stylesheets are included inline in development, and as a separate `main.css` file in production.  In our new build process using .NET Core, we have a similar situation.  The main differences are that we are checking the environment directly in the template instead of having separate .html files, and our stylesheet will be called `client.css` due to the fact that is how we named the entry point in the webpack configuration.
 
 Next, we need to actually tell our application when to serve the page.  We need a controller that will serve it.  We will create a `HomeController.cs` file in the `Controllers` folder to do this.
 
