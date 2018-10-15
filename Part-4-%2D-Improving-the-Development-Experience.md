@@ -737,4 +737,4 @@ You will see the text turn red, without reloading the component itself.
 
 ## Download Source
 
-https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-4
+https://github.com/mjhoffm2/react-demo/tree/Part-4
