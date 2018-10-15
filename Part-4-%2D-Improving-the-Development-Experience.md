@@ -331,7 +331,7 @@ export class App {
 }
 ```
 
-Both the dev middleware and the hot middleware and added using the `configureMiddleWare()` method, which is called before the other routes/middlewares are configured.  Additionally, these middlewares are only enabled when the server is running in 'development' mode.
+Both the dev middleware and the hot middleware are added using the `configureMiddleWare()` method, which is called before the other routes/middlewares are configured.  Additionally, these middlewares are only enabled when the server is running in 'development' mode.
 
 ### Update client
 
