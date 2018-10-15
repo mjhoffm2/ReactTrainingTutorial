@@ -441,4 +441,4 @@ I also recommend adding an npm script to the package.json file to host the serve
 This lets us use `npm run host` instead of `node ./build/main.js` in the console.
 
 ## Download Source
-The complete code for this part of the tutorial can be found here: https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-1
+The complete code for this part of the tutorial can be found here: https://github.com/mjhoffm2/react-demo/tree/Part-1
