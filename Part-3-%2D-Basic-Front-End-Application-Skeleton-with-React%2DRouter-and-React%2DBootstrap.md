@@ -1050,4 +1050,4 @@ npm run host
 ![image.png](/.attachments/image-1ad3cc4d-6d2d-49aa-8bba-e003a519b110.png)
 
 ## Download Source
-https://dev.azure.com/echeloncons/_git/Slack%20Training%20App?version=GBPart-3
+https://github.com/mjhoffm2/react-demo/tree/Part-3
