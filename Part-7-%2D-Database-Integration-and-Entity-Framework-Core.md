@@ -57,4 +57,29 @@ Scaffold-DbContext "Server=.\SQLEXPRESS;Database=SlackTraining;Trusted_Connectio
 
 This will build our project, then generate a bunch of files in the `Models/Database` directory.  These files will include a `SlackTrainingDbEntities.cs` file, which will be our Entity Framework Core Database Context.  Please note that within this file, the connection string will be included in the `OnConfiguring` method.  If you put any actual credentials into your connection string when using the scaffolding tool, you should remove them from your code before committing them to source control.  Also note that if your project is currently in a state that does not successfully build, the scaffolding tool will not run.
 
-One issue I ran into with the scaffolding tool is the fact that the name of my project is 'React Demo', but an identified cannot have a space in it so my namespace is actually 'react_demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I will simply be manually fixing the names after using the scaffolding tool.
+One issue I ran into with the scaffolding tool is the fact that the name of my project is 'React Demo', but an indentifier cannot have a space in it so my namespace is actually 'react_demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I will simply be manually fixing the names after using the scaffolding tool.
+
+### Extending the Generated Classes
+
+After using the entity framework scaffolding tool, we will have a model created for each of our database tables, and a model created for our entity framework context, extending the `DbContext` class from EF Core.  However, I would strongly advise against making any changes to these files, since those changes will be overwritten if you run the scaffolding tool again.  As you add more tables and update existing tables, it will save a lot of time to be able to automate the process by re-running the same scaffolding command.  Therefore, any adjustments to the generated code should ideally be maintained in separate files.
+
+The first thing we will likely need to adjust is our connection string.  Instead of placing the connection string directly in the code, we will place it in the appsettings file for the particular environment.  When debugging in your local environment, this environment is 'Development'.  Edit or create a file called `appsettings.Development.json` located in the same directory as your .csproj file, and add a field called `"ConnectionStrings"`.  Within this field, we will add any connection strings which are necessary for our application.
+
+_appsettings.Development.json_
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "System": "Information",
+      "Microsoft": "Information"
+    }
+  },
+  "ConnectionStrings": {
+    "SlackTrainingConnectionString": "Server=.\\SQLEXPRESS;Database=SlackTraining;Trusted_Connection=True;"
+  }
+}
+```
+In this example, I am adding the same connection string as I used to run the scaffolding tool, but you can have any valid connection string.  Make sure not to commit sensitive credentials to version control.
+
+The EF scaffolding tool generates partial classes, which makes it possible to extend our existing classes quite easily.
