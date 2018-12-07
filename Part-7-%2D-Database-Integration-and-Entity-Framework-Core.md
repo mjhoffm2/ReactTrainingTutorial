@@ -41,6 +41,7 @@ To generate the Entity Framework database context, we will be using the Entity F
 Before we can use it, we need to figure out what connection string we want to use, and where we want the files to be placed.
 
 For this tutorial, I decided on the following file structure:
+
 ![image.png](/.attachments/image-fe8ad13e-e4fa-4e56-852a-f75149473cdf.png)
 
 For now, we can just use windows authentication for the connection string.  This is an authentication scheme that simply uses the fact you are signed in to your local windows account.  To connect to the SlackTraining database on our local SQL Express server using windows authentication, we use the following connection string:

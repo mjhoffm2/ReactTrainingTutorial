@@ -17,6 +17,7 @@ I am using v2.1.5 - SDK 2.1.403
 ![image.png](/.attachments/image-ed7cea1a-77f9-4e8e-8286-5d57c7acb92f.png)
 
 ![image.png](/.attachments/image-5c11032d-54ef-40ab-afcc-e6e6cd4f4136.png)
+
 I recommend choosing a name that does not include any spaces or special characters, even though Visual Studio will let you.
 
 **Warning**: If you check the box that says "Create new Git repository", and the folder or one of its parents already has an existing .git folder, then you may end up corrupting the existing git repository.  To help you get started, here is a zip containing a .gitignore file that you can place in the same directory as your .csproj file: [gitignore.zip](/.attachments/gitignore-f78fa947-dee4-4e71-8270-5aedfe985437.zip).
@@ -368,6 +369,7 @@ _Views/Home/Index.cshtml_
     <script src="~/dist/bundle.js" asp-append-version="true"></script>
 }
 ```
+
 ![image.png](/.attachments/image-e572aa55-94fb-493c-b75b-e2be9ff5b7d8.png)
 
 The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.  Make sure that you use the correct namespace in the `_ViewImports.cshtml_` file, since you probably didn't name your project 'React Demo'.
@@ -530,6 +532,7 @@ _launchSettings.json_
 ```
 
 To start running the code to debug it, simply click the green play button at the top that says "IIS Express".
+
 ![image.png](/.attachments/image-6218027b-7f1a-4014-bd9a-b12f5f23ae58.png)
 
 The first time you debug the application, it will need to run `npm install` as we configured in the .csproj file.  This can take a while, so be patient.  Additionally, you will probably be asked to install an ssl security certificate for your localhost.
@@ -551,16 +554,21 @@ Closing this window will stop the debugger, and stopping the debugger will close
 Most of the difficult configuration for publishing is already taken care of in the .csproj file that I provided.  If you run into other issues, you will need to do some googling.
 
 To get started, right click on your project and select 'Publish...'
+
 ![image.png](/.attachments/image-0df45af7-617a-4bf4-8c79-2d3acbf4c3e9.png)
 
 Choose the 'Folder' target
+
 ![image.png](/.attachments/image-614541cb-30e2-40ff-bf71-66ea635fcc30.png)
 
 Before creating the profile, I recommend clicking the 'Advanced...' button and applying the following settings:
+
 ![image.png](/.attachments/image-a5f206d1-3e2d-41f0-a474-7e95f4431c4f.png)
+
 Doing a self-contained deployment is not optimal, but it reduces the number of things that could go wrong with the deployment.
 
 When you finish creating the profile, you should see something like this:
+
 ![image.png](/.attachments/image-ebf764e1-024a-4d3a-aa26-79ac0ef3b570.png)
 
 At this point, you can go ahead and click the 'Publish' button.  When it finishes, you can head over to the folder you selected for publishing.  In this example, that folder is `React Demo\bin\Release\netcoreapp2.1\publish`.  From there, you can open up a command prompt and do the following:
@@ -582,7 +590,11 @@ In this example, port 5001 is the secure port, so a request to localhost:5000 sh
 
 ![image.png](/.attachments/image-16b99a40-e65c-4293-b3a5-db4cb41c6d7c.png)
 
-Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  This will be out of scope for this tutorial.
+Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  The next section covers this.
+
+## Enabling Compression in IIS
+
+In a .NET Core application, compression is typically configured on the IIS server instead of on the application server.
 
 ## Issues I ran into and how to address them
 
@@ -593,7 +605,9 @@ When trying to debug the application for the first time, I got an error about be
 1. Disable the ssl port in the launch settings by removing the "sslPort" field in "iisExpress"
 2. Close Visual Studio
 3. Stopped IIS Express in the windows toolbar.  See the below image:
+
 ![image.png](/.attachments/image-eaed5ac9-0cbc-4918-8459-1d30f162e962.png)
+
 4. Deleted my .vs folder
 5. Reopened the solution in Visual Studio
 

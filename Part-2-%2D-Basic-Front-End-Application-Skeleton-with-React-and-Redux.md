@@ -304,7 +304,7 @@ export interface Channel {
 }
 ```
 
-In the above code, we have defined an interface called `State` which describes an object with two properties, `users` and `channels`.  Each of these properties can either contain `null`, or contain an array of a corresponding object, the interfaces for which are defined in the same code.  These interfaces are based on the requirements for the [Slack Training App](/Slack-Training-App-%252D-Tutorial-Overview.md), but we could have chosen to design our state in any way we saw fit for the purposes of this part of the tutorial.
+In the above code, we have defined an interface called `State` which describes an object with two properties, `users` and `channels`.  Each of these properties can either contain `null`, or contain an array of a corresponding object, the interfaces for which are defined in the same code.  These interfaces are based on the requirements for the [Slack Training App](https://github.com/mjhoffm2/ReactTrainingTutorial/blob/master/Slack-Training-App-%252D-Tutorial-Overview.md), but we could have chosen to design our state in any way we saw fit for the purposes of this part of the tutorial.
 
 As a reminder, this code is merely a type definition, no JavaScript will actually get created from it.
 
@@ -470,7 +470,7 @@ The entire API for React-Redux boils down to two simple pieces.
 1. The `<Provider />` component - This component can be placed at or near the root of your React application, which will make the Redux store available for the rest of the application, without needing to pass the store explicitly through to each component.
 2. The `connect()` method - This method is used to create 'higher order' components, and encapsulates the process of getting data into and out of the Redux store.  The idea is that you can write a React component which uses a bunch of data from the Redux store via props, and then use the `connect()` method to wrap the component and export it such that the parent doesn't need to provide that data via props.
 
-You can read more information from the official documentation: https://github.com/reduxjs/react-redux/blob/master/docs/GettingStarted.md
+You can read more information from the official documentation: https://react-redux.js.org/introduction/quick-start
 
 ### Create a Component
 
