@@ -28,6 +28,8 @@ To save you some time, I will provide a zip containing two sql scripts to get st
 
 The 'init db' script will create an empty database on the database server called `SlackTraining`.  You could easily make this database yourself if you want.  The other 'init ddl' script will create the four tables you see in the diagram above, as well as the indices and foreign key constraints between them.  The `SlackTraining` database must exist before you run the 'init ddl' script.  You should be able to simply open up SSMS, connect to the local SQL Server Express instance, and run these queries without any additional configuration.
 
+If you want to change the database name, or if the init db script doesn't work for you, you can simply skip it and create the database yourself with any name.  Next, update or remove the `USE [SlackTraining]` at the beginning of the init ddl script, and run it.  Make sure that the database name that you pick is reflected in your connection strings.
+
 ## Create Entity Framework Database Context
 
 ### Overview
@@ -58,11 +60,17 @@ Scaffold-DbContext "Server=.\SQLEXPRESS;Database=SlackTraining;Trusted_Connectio
 
 This will build our project, then generate a bunch of files in the `Models/Database` directory.  These files will include a `SlackTrainingDbEntities.cs` file, which will be our Entity Framework Core Database Context.  Please note that within this file, the connection string will be included in the `OnConfiguring` method.  If you put any actual credentials into your connection string when using the scaffolding tool, you should remove them from your code before committing them to source control.  Also note that if your project is currently in a state that does not successfully build, the scaffolding tool will not run.
 
-One issue I ran into with the scaffolding tool is the fact that the name of my project is 'React Demo', but an indentifier cannot have a space in it so my namespace is actually 'react_demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I will simply be manually fixing the names after using the scaffolding tool.
+The scaffolding tool may also add a section to your .csproj file that looks like `<Folder Include="Models\" />` or `<Folder Include="Models\Database" />` under an ItemGroup.  This is unnecessary and you can remove it.
 
 ### Extending the Generated Classes
 
+#### Code changes
+
 After using the entity framework scaffolding tool, we will have a model created for each of our database tables, and a model created for our entity framework context, extending the `DbContext` class from EF Core.  However, I would strongly advise against making any changes to these files, since those changes will be overwritten if you run the scaffolding tool again.  As you add more tables and update existing tables, it will save a lot of time to be able to automate the process by re-running the same scaffolding command.  Therefore, any adjustments to the generated code should ideally be maintained in separate files.
+
+The EF scaffolding tool generates partial classes, which makes it possible to extend these existing classes quite easily.  
+
+#### The appsettings file
 
 The first thing we will likely need to adjust is our connection string.  Instead of placing the connection string directly in the code, we will place it in the appsettings file for the particular environment.  When debugging in your local environment, this environment is 'Development'.  Edit or create a file called `appsettings.Development.json` located in the same directory as your .csproj file, and add a field called `"ConnectionStrings"`.  Within this field, we will add any connection strings which are necessary for our application.
 
@@ -81,6 +89,215 @@ _appsettings.Development.json_
   }
 }
 ```
-In this example, I am adding the same connection string as I used to run the scaffolding tool, but you can have any valid connection string.  Make sure not to commit sensitive credentials to version control.
+In this example, I am adding the same connection string as I used to run the scaffolding tool, but you can have any valid connection string.  Make sure not to commit sensitive credentials to version control.  You can have different connection strings for different environments, and ASP.NET Core will automatically use the appsettings file that has a name matching `appsettings.{ENVIRONMENT}.json`.
 
-The EF scaffolding tool generates partial classes, which makes it possible to extend our existing classes quite easily.
+#### Creating a new Database Context
+
+While the automatically generated database context likely contains 99% of what we want, it is still important to be able to make careful adjustments to the model and add behavior depending on the current configuration.  To accomplish this, we will create a new database context that extends the generated one.  I will place this new context in a new top-level folder called `Services`
+
+_Services\/SlackTrainingDb.cs_
+```cs
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using React_Demo.Models.Database;
+
+namespace React_Demo.Services
+{
+	public class SlackTrainingDb : SlackTrainingDbEntities
+	{
+		public readonly IConfiguration config;
+
+		//config will be provided via dependency injection
+		public SlackTrainingDb(IConfiguration config)
+		{
+			this.config = config;
+		}
+
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		{
+			//use the connection string provided in the appsettings.{Environment}.json file
+			optionsBuilder.UseSqlServer(config.GetConnectionString("SlackTrainingConnectionString"));
+		}
+	}
+}
+```
+
+This simple service simply extends the existing SlackTrainingDbEntities class and provides a new OnConfiguring method which pulls the connection string from our configuration.
+
+We will also need to remember to register this service for dependency injection in the `ConfigureServices` method in the `Startup` class.
+
+_Startup.cs_
+```cs
+public void ConfigureServices(IServiceCollection services)
+{
+	services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+	services.AddDbContext<SlackTrainingDb>();
+}
+```
+
+Now, the `SlackTrainingDb` service is ready to be used.
+
+## Use the EF Core to make a CRUD API
+
+### Overview
+
+Now that we have got our `SlackTrainingDb` database context working and configured as a service, it can be used by our other services.  The easiest way to do this is to use dependency injection in the constructors for the service.  You should not be manually instantiating your services with `new` in ASP.NET Core.
+
+In this section, we are going to create a very basic api to manage channels.  This api will have an endpoint for getting the list of channels, and another endpoint for adding a channel.  Later on, we can extend this api to do things like update channels, delete channels, perform permission checks, validation, and so on.
+
+Our basic CRUD api will need a service and a controller, as well as a tiny bit of other configuration.
+
+### Service Implementation
+
+Using the database context is super simple, and this simplicity is the whole reason we went through all the previous effort.  If we want to get the list of channels from the database, we can use `context.Channel`.  This will give us a `DbSet<Channel>`, which extends `IEnumerable<Channel>`.  For performance reasons (and avoid issues with the database getting disposed), we will convert this DbSet to a List asynchronously using `await context.Channel.ToListAsync()` before returning.
+
+When we want to add a channel to the database, we do it in two steps.  First, we add the information about the channel we want to create to the database context.  This will allow EF Core to start tracking the entity.  Next, we call `await context.SaveChangesAsync();` to write it to the database.
+
+_Services\/ChannelManagerService.cs_
+```cs
+using Microsoft.EntityFrameworkCore;
+using React_Demo.Models.Database;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace React_Demo.Services
+{
+	public class ChannelManagerService
+	{
+		readonly SlackTrainingDb context;
+
+		public ChannelManagerService(SlackTrainingDb context)
+		{
+			this.context = context;
+		}
+
+		public async Task<List<Channel>> GetChannels()
+		{
+			return await context.Channel.ToListAsync();
+		}
+
+		public async Task AddChannel(string displayName, string description, bool isPublic)
+		{
+			if(String.IsNullOrWhiteSpace(displayName))
+			{
+				throw new ArgumentException("Channel display name cannot be empty", nameof(displayName));
+			}
+
+			context.Channel.Add(new Channel()
+			{
+				DisplayName = displayName,
+				Description = description,
+				IsPublic = isPublic
+			});
+
+			await context.SaveChangesAsync();
+		}
+	}
+}
+```
+
+Don't forget to also register the new service for dependency injection by adding it to the `ConfigureServices` method in the `Startup` class.
+
+_Startup.cs_
+```cs
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
+		{
+			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+			services.AddDbContext<SlackTrainingDb>();
+			services.AddScoped<ChannelManagerService>();
+		}
+```
+
+### Controller Implementation
+
+_Controllers\/ChannelManagerController.cs_
+```cs
+using Microsoft.AspNetCore.Mvc;
+using React_Demo.Models.Database;
+using React_Demo.Services;
+using System.Threading.Tasks;
+
+namespace React_Demo.Controllers
+{
+	[Route("api/channels")]
+	public class ChannelManagerController : Controller
+	{
+		readonly ChannelManagerService channelService;
+
+		public ChannelManagerController(ChannelManagerService channelService)
+		{
+			this.channelService = channelService;
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> GetChannels()
+		{
+			var channels = await channelService.GetChannels();
+			return Json(channels);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> AddChannel([FromBody] Channel channel)
+		{
+			await channelService.AddChannel(channel.DisplayName, channel.Description, channel.IsPublic);
+			return Ok();
+		}
+	}
+}
+```
+
+Controllers do not need to by registered in the `ConfigureServices` method in the `Startup` class, so we are done.
+
+## Test it out
+
+```js
+var data = JSON.stringify({
+  "displayName": "the cool kids club"
+});
+
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === 4) {
+    console.log(this.responseText);
+  }
+});
+
+xhr.open("POST", "http://localhost:53609/api/channels");
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Cache-Control", "no-cache");
+xhr.setRequestHeader("Postman-Token", "f02bbbb5-c390-44b0-9d9a-2dae31a0a926");
+
+xhr.send(data);
+```
+Should produce a 200 OK response.
+
+GET http://localhost:53609/api/channels
+```json
+[
+    {
+        "channelId": 1,
+        "ownerId": null,
+        "displayName": "the cool kids club",
+        "description": null,
+        "isPublic": false,
+        "canAnyoneInvite": false,
+        "isGeneral": false,
+        "isActiveDirectMessage": false,
+        "isSoftDeleted": false,
+        "owner": null,
+        "message": [],
+        "userChannel": []
+    }
+]
+```
+
+## Issues I ran into and how to address them
+
+### Generated code contains errors due to project name
+
+One issue I ran into with the scaffolding tool is the fact that the name of my project was originally 'React Demo', but an indentifier cannot have a space in it so my namespace is actually 'React_Demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I simply fixed the names after using the scaffolding tool.  Later, I renamed the project to be 'React_Demo' with an underscore instead of a space.  This was done by renaming and updating the solution (.sln) file, then renaming the .csproj file.
