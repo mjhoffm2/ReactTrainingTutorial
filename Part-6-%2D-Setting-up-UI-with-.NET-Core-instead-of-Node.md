@@ -92,7 +92,19 @@ _YourProject.csproj_
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="package-lock.json" />
+    <Content Remove="package.json" />
+    <Content Remove="tsconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\dist\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="package-lock.json" />
+    <None Include="package.json" />
+    <None Include="tsconfig.json" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('node_modules') ">
@@ -131,7 +143,7 @@ _YourProject.csproj_
 The important things this is doing:
 1. Installs NPM dependencies the first time we try to build the project.
 2. Cleans and builds the front end in production mode when publishing.
-3. Configures which files to copy and which to ignore for publishing.  In this case, all files in the ClientApp folder will be excluded from the publish.  All files in the wwwroot/dist folder are included in the publish.
+3. Configures which files to copy and which to ignore for publishing.  In this case, all files in the ClientApp folder will be excluded from the publish.  All files in the wwwroot/dist folder are included in the publish.  The three files `package-lock.json`, `package.json`, and `tsconfig.json` are also excluded from the publish.  Additional files can be excluded by setting their build action to **None** in visual studio.
 
 Note that this only runs `npm install` if the `node_modules` folder doesn't already exist.  In the future, if you update your npm dependencies, it will not automatically run `npm install` when you debug your application.  You will need to manually run `npm install` from the command line after updating your npm dependencies before you start debugging.
 
@@ -590,7 +602,11 @@ In this example, port 5001 is the secure port, so a request to localhost:5000 sh
 
 ![image.png](/.attachments/image-16b99a40-e65c-4293-b3a5-db4cb41c6d7c.png)
 
-Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  This will be out of scope for this tutorial.
+Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  The next section covers this.
+
+## Enabling Compression in IIS
+
+In a .NET Core application, compression is typically configured on the IIS server instead of on the application server.
 
 ## Issues I ran into and how to address them
 
