@@ -18,7 +18,7 @@ I am using v2.1.5 - SDK 2.1.403
 
 ![image.png](/.attachments/image-5c11032d-54ef-40ab-afcc-e6e6cd4f4136.png)
 
-I recommend choosing a name that does not include any spaces or special characters, even though Visual Studio will let you.
+I highly recommend choosing a name that does not include any spaces or special characters, even though Visual Studio will let you.  You will run into problems where generated files will try to use the name as an identifier, which doesn't work if there is a space or special character.  You will constantly need to fix generated files like the web.config during deployments.
 
 **Warning**: If you check the box that says "Create new Git repository", and the folder or one of its parents already has an existing .git folder, then you may end up corrupting the existing git repository.  To help you get started, here is a zip containing a .gitignore file that you can place in the same directory as your .csproj file: [gitignore.zip](/.attachments/gitignore-f78fa947-dee4-4e71-8270-5aedfe985437.zip).
 
