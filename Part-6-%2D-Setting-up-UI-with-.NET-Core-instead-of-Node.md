@@ -384,7 +384,7 @@ _Views/Home/Index.cshtml_
 
 ![image.png](/.attachments/image-e572aa55-94fb-493c-b75b-e2be9ff5b7d8.png)
 
-The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.  Make sure that you use the correct namespace in the `_ViewImports.cshtml_` file, since you probably didn't name your project 'React Demo'.
+The two files that actually assemble the content on the page are the `_Layout.cshtml` and `Index.cshtml` files.  For our application, we could probably just merge these two files together.  Make sure that you use the correct namespace in the `_ViewImports.cshtml_` file, since you probably didn't name your project 'React_Demo'.
 
 Note that in the `_Layout.cshtml` file, we are checking to see if the current environment is "Development" or not.  In any environment other than local debugging, we will need to include our .css source file separately.  If you recall from [Part 5 - Bundling for Production](/Part-5-%252D-Bundling-for-Production.md), in the section about separating css, we needed to provide two separate .html files due to the fact that our .css stylesheets are included inline in development, and as a separate `main.css` file in production.  In our new build process using .NET Core, we have a similar situation.  The main differences are that we are checking the environment directly in the template instead of having separate .html files, and our stylesheet will be called `client.css` due to the fact that is how we named the entry point in the webpack configuration.
 
@@ -419,7 +419,7 @@ namespace React_Demo.Controllers
 }
 ```
 
-Again, make sure to correct the namespace since you probably didn't name your project 'React Demo'.
+Again, make sure to correct the namespace since you probably didn't name your project 'React_Demo'.
 
 Finally, we need to hook up this controller to our HTTP request pipeline.  We will do this by adding the MVC middleware at the end of our request pipeline in the `Configure` method of our `Startup.cs` class.
 
@@ -585,11 +585,11 @@ When you finish creating the profile, you should see something like this:
 
 At this point, you can go ahead and click the 'Publish' button.  When it finishes, you can head over to the folder you selected for publishing.  In this example, that folder is `React Demo\bin\Release\netcoreapp2.1\publish`.  From there, you can open up a command prompt and do the following:
 1. Set the ASPNETCORE_ENVIRONMENT variable to something other than 'Development'.  This will have defaulted to 'Production' if you didn't set anything, so you likely don't need to do anything.
-2. Run the .exe that was generated for your project.  In this example, the exe is `React Demo.exe`.  You should see something like the following:
+2. Run the .exe that was generated for your project.  In this example, the exe is `React_Demo.exe`.  You should see something like the following:
 
 ```ps
 > $env:ASPNETCORE_ENVIRONMENT = "Staging"
-> & '.\React Demo.exe'
+> & '.\React_Demo.exe'
 
 Hosting environment: Staging
 Content root path: C:\Users\Matt Hoffman\git\react-demo\.net core 2.1\React Demo\bin\Release\netcoreapp2.1\publish
