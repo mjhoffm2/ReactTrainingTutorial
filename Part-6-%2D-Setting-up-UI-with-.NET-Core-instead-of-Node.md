@@ -590,11 +590,7 @@ In this example, port 5001 is the secure port, so a request to localhost:5000 sh
 
 ![image.png](/.attachments/image-16b99a40-e65c-4293-b3a5-db4cb41c6d7c.png)
 
-Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  The next section covers this.
-
-## Enabling Compression in IIS
-
-In a .NET Core application, compression is typically configured on the IIS server instead of on the application server.
+Based on the size of the javascript bundle and the separate css bundle, we can see our production front end resources are correctly being built and used.  The only thing that we are missing from the node server running express is the gzip compression.  However, in a .NET Core application, that is typically configured on IIS, and not on the application server.  This will be out of scope for this tutorial.
 
 ## Issues I ran into and how to address them
 
