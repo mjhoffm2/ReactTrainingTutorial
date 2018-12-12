@@ -177,13 +177,123 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 
 ### Channel Search
 
+_Services\/ChannelManagerService.cs_
+```cs
+public async Task<List<Channel>> GetChannels(string search, int limit, int offset)
+{
+	return await context.Channel
+		.Where(channel => channel.IsPublic)
+		.Where(channel => !channel.IsSoftDeleted)
+		.Where(channel => search == "" || channel.DisplayName.StartsWith(search) || channel.Description.Contains(search))
+		.Skip(offset)
+		.Take(limit)
+		.ToListAsync();
+}
+```
+
 ### Getting a Single Channel
+
+_Services\/ChannelManagerService.cs_
+```cs
+public async Task<Channel> GetChannel(long channelId)
+{
+	Channel channel = await context.Channel.FindAsync(channelId);
+
+	if (channel == null)
+	{
+		throw new NotFoundException("No channel exists with the id: " + channelId);
+	}
+	return channel;
+}
+```
 
 ### Adding a Channel
 
+_Services\/ChannelManagerService.cs_
+```cs
+		public async Task<Channel> AddChannel(Channel channel)
+		{
+			string displayName = channel.DisplayName;
+			string description = channel.Description;
+			bool isPublic = channel.IsPublic;
+
+			if (String.IsNullOrWhiteSpace(displayName))
+			{
+				throw new BadRequestException("Channel display name cannot be empty");
+			}
+
+			Channel channelToCreate = new Channel()
+			{
+				DisplayName = displayName,
+				Description = description,
+				IsPublic = isPublic
+			};
+
+			context.Channel.Add(channelToCreate);
+
+			await context.SaveChangesAsync();
+
+			return channelToCreate;
+		}
+```
+
 ### Updating a Channel
 
+_Services\/ChannelManagerService.cs_
+```cs
+public async Task<Channel> UpdateChannel(Channel channel)
+{
+	long channelId = channel.ChannelId;
+	string displayName = channel.DisplayName;
+	string description = channel.Description;
+	bool isPublic= channel.IsPublic;
+
+	//the channel provided as an argument is simply a deserialized object from the user
+	//we need to obtain the tracked entity from EF Core
+	Channel oldChannel = await context.Channel.FindAsync(channelId);
+
+	if (oldChannel == null)
+	{
+		throw new NotFoundException("No channel exists with the id: " + channelId);
+	}
+
+	if(String.IsNullOrWhiteSpace(displayName))
+	{
+		throw new BadRequestException("Channel display name cannot be empty");
+	}
+
+	oldChannel.DisplayName = displayName;
+	oldChannel.Description = description;
+	oldChannel.IsPublic = isPublic;
+
+	await context.SaveChangesAsync();
+
+	return oldChannel;
+}
+```
+
 ### Deleting a Channel
+
+_Services\/ChannelManagerService.cs_
+```cs
+public async Task DeleteChannel(Channel channel)
+{
+	long channelId = channel.ChannelId;
+
+	//the channel provided as an argument is simply a deserialized object from the user
+	//we need to obtain the tracked entity from EF Core
+	Channel oldChannel = await context.Channel.FindAsync(channelId);
+
+	if (oldChannel == null)
+	{
+		throw new NotFoundException("No channel exists with the id: " + channelId);
+	}
+
+	context.Channel.Remove(oldChannel);
+
+	await context.SaveChangesAsync();
+}
+```
 
 ## Updating the Channel Manager Controller
 
@@ -340,6 +450,38 @@ xhr.send();
 ```js
 var data = JSON.stringify({
   "channelId": 13,
+  "isPublic": true
+});
+
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === 4) {
+    var log = (this.status >= 200 && this.status < 300) ? console.log : console.error;
+
+    log(this.status + " " + this.statusText);
+
+    try {
+      log(JSON.parse(this.response || this.responseText));
+    } catch(e) {
+      //ignore
+    }
+  }
+});
+
+xhr.open("PATCH", "/api/channels");
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Cache-Control", "no-cache");
+
+xhr.send(data);
+```
+
+![image.png](/.attachments/image-079e3dbc-d9a6-4c35-b882-1bf5bc2f8864.png)
+
+```js
+var data = JSON.stringify({
+  "channelId": 13,
   "displayName": "my channel",
   "description": "only cool people allowed",
   "isPublic": true
@@ -374,3 +516,9 @@ xhr.send(data);
 ![image.png](/.attachments/image-69d3db4b-2e56-40e7-9764-0ef0def2c01b.png)
 
 ## Download Source
+
+The source code up to this point can be found here:
+
+https://github.com/mjhoffm2/react-demo/tree/Part-8
+
+The code for this part of the tutorial can be found in the `.net core 2.1` folder.
