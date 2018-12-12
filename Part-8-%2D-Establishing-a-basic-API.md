@@ -1,10 +1,10 @@
-# Part 8 - Establishing a basic API
+# Part 8 - Establishing a Basic API
 
 ## Overview
 
 This part of the tutorial is continued from [Part 7 - Database Integration and Entity Framework Core](/Part-7-%2D-Database-Integration-and-Entity-Framework-Core).
 
-In that part of the tutorial, we already set up an API controller with two basic endpoints.  In this part of the tutorial, we are going to extend that API by making our channel manager service and controller more interesting.  We are also going to set up a system for setting response codes for when things go wrong.
+In the previous part of the tutorial, we already set up an API controller with two basic endpoints.  In this part of the tutorial, we are going to extend that API by making our channel manager service and controller more interesting.  We are also going to set up a system for setting response codes for when things go wrong.
 
 ## Setting Response Codes
 
@@ -18,15 +18,17 @@ My solution to this is to have a special set of `ApiException` classes, and a mi
 
 ### File Structure
 
-![image.png](/.attachments/image-eec8f5b7-90dd-456f-ad69-21a9c9c588cf.png)
+![image.png](/.attachments/image-5ee9103a-961e-4c9b-9f02-e3e238811079.png)
 
 ### Response Model
 
-_Models\/API\/ApiException.cs_
+When we send an error to the user, it is helpful to have a consistent and understandable error format that can be parsed by the front end code.  By default, ASP.NET Core will generate html pages as the response bodies when an error happens.  However, since we are making an API, it would be more useful if we produced a consistently shaped JSON response instead.  We will define the shape of the response body in a new class.
+
+_Models\/API\/ApiExceptionResponse.cs_
 ```cs
 namespace React_Demo.Models.API
 {
-	public class ApiException
+	public class ApiExceptionResponse
 	{
 		public string Type { get; set; }
 		public string Message { get; set; }
@@ -36,6 +38,8 @@ namespace React_Demo.Models.API
 
 ### Exception Classes
 
+Instead of throwing generic exceptions like `ArgumentException`, our service endpoints will throw special exceptions which can be mapped to specific status codes.  For this example, I will create three special exception types (`NotFoundException`, `BadRequestException`, and `UnauthorizedException`), which all extend the same base `ApiException` class.
+
 _Util\/ApiExceptions.cs_
 ```cs
 using System;
@@ -44,7 +48,6 @@ namespace React_Demo.Util
 {
 	public abstract class ApiException : Exception
 	{
-
 		public ApiException() { }
 		public ApiException(string message) : base(message) { }
 		public ApiException(string message, Exception inner) : base(message, inner) { }
@@ -75,6 +78,10 @@ namespace React_Demo.Util
 
 ### Exception Middleware
 
+When one of these exceptions is thrown by our application, we will handle them by adding a middleware to our request pipeline.  A decent reference for this can be found here: https://blogs.msdn.microsoft.com/brandonh/2017/07/31/using-middleware-to-trap-exceptions-in-asp-net-core/ or https://code-maze.com/global-error-handling-aspnetcore/
+
+The idea is that we will wrap the entire pipeline in a big try-catch, and then catch exceptions that extend ApiException.  In the handler for this exception, we will set the appropriate status code, and write the response body with properly formatted JSON.  If we don't recognize the error, then we keep the 500 status code.
+
 _Util\/ExceptionMiddleware.cs_
 ```cs
 using Microsoft.AspNetCore.Builder;
@@ -82,6 +89,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using React_Demo.Models.API;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -128,7 +136,7 @@ namespace React_Demo.Util
 					context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 				}
 
-				Models.API.ApiException errObj = new Models.API.ApiException()
+				ApiExceptionResponse errObj = new ApiExceptionResponse()
 				{
 					Type = "ApiException",
 					Message = e.Message
@@ -160,6 +168,8 @@ namespace React_Demo.Util
 }
 ```
 
+We use this middleware by creating an extension method called `UseExceptionStatusCodes` on the `IApplicationBuilder` class, and then invoke it in the `Configure` method of our `Startup` class.
+
 _Startup.cs_
 ```cs
 public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -173,9 +183,15 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 }
 ```
 
+This middleware should be earlier in the pipeline than any other middleware that could produce an `ApiException`.  It should also be added later than any middleware which relies on accurate status codes and responses.
+
 ## Updating the Channel Manager Service
 
+Next up, it is time to update our service methods to utilize the new exception status code system we made, as well as add some new features.
+
 ### Channel Search
+
+Let's extend the method that fetches all channels to include a search string and paging options.  Let's also take into account whether or not a channel is public and whether or not the channel has been marked as deleted.  Ideally, any private channels that a user is a member of would also show up, but we don't yet have a concept of users or authentication built, so we will ignore this for now.
 
 _Services\/ChannelManagerService.cs_
 ```cs
@@ -193,6 +209,8 @@ public async Task<List<Channel>> GetChannels(string search, int limit, int offse
 
 ### Getting a Single Channel
 
+Next, let's add an endpoint that will return a channel given an id, regardless of whether or not the channel is public or has been marked as deleted.  We can also make use of the new `NotFoundException` that we created in the event a bad channelId is given.
+
 _Services\/ChannelManagerService.cs_
 ```cs
 public async Task<Channel> GetChannel(long channelId)
@@ -208,6 +226,12 @@ public async Task<Channel> GetChannel(long channelId)
 ```
 
 ### Adding a Channel
+
+In the previous part of the tutorial, we already created a service method for adding a channel.  For consistency with other methods in this service class, I'm going to change it to take a `Channel` as a parameter, and also have it return the channel that is created.
+
+Please keep in mind that the channel provided by the user is the deserialized object from the request body provided by the user.  We don't want to just add this directly to the database context, since we probably don't want to let the user directly set all of the fields on the object.  Instead, we pick and choose the specific fields that we want to let the user set, and create a new `Channel` object with those fields set.  It is particularly important to not set the primary key `ChannelId` on the channel being created, since that is set to be an auto generated identity column.
+
+After we add the channel to the context and then save the changes to the database, we return the channel that we created, which will now have its primary key set.  It is useful to return the Channel from a POST method since it will inform the client what the generated primary key is, which can then be used immediately.
 
 _Services\/ChannelManagerService.cs_
 ```cs
@@ -238,6 +262,8 @@ public async Task<Channel> AddChannel(Channel channel)
 ```
 
 ### Updating a Channel
+
+Updating a channel is done by looking up the existing channel by `ChannelId`, and updating the fields on it to match the provided channel.  Again, we only want to allow the user to modify certain fields, so we can't just take all the changes directly.  Instead, we will check to make sure the channel being modified actually exists, validate the input from the user, and then we can update the channel.  In this example, I am returning the updated channel from the service method, but that isn't really necessary since the client should know exactly what to expect in the new channel.  It is fine if a PATCH endpoint simply returns an empty 200 OK response.
 
 _Services\/ChannelManagerService.cs_
 ```cs
