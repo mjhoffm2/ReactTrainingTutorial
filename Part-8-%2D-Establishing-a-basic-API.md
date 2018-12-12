@@ -213,7 +213,7 @@ namespace React_Demo.Controllers
 			return Json(channels);
 		}
 
-		[HttpGet]
+		[HttpGet("byId")]
 		public async Task<IActionResult> GetChannel([FromQuery] long channelId)
 		{
 			var channel = await channelService.GetChannel(channelId);
@@ -223,8 +223,8 @@ namespace React_Demo.Controllers
 		[HttpPost]
 		public async Task<IActionResult> AddChannel([FromBody] Channel channel)
 		{
-			await channelService.AddChannel(channel);
-			return Ok();
+			var createdChannel = await channelService.AddChannel(channel);
+			return Json(createdChannel);
 		}
 
 		[HttpPatch]
@@ -245,5 +245,132 @@ namespace React_Demo.Controllers
 ```
 
 ## Try it out
+
+### Empty name
+
+```js
+var data = JSON.stringify({
+  "displayName": "" //empty name
+});
+
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === 4) {
+    var log = (this.status >= 200 && this.status < 300) ? console.log : console.error;
+
+    log(this.status + " " + this.statusText);
+
+    try {
+      log(JSON.parse(this.response || this.responseText));
+    } catch(e) {
+      //ignore
+    }
+  }
+});
+
+xhr.open("POST", "/api/channels");
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Cache-Control", "no-cache");
+
+xhr.send(data);
+```
+
+![image.png](/.attachments/image-8e4b0efb-b860-4d9e-9acb-7fb1226f7302.png)
+
+```js
+var data = JSON.stringify({
+  "displayName": "my channel",
+  "description": "only cool people allowed"
+});
+
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === 4) {
+    var log = (this.status >= 200 && this.status < 300) ? console.log : console.error;
+
+    log(this.status + " " + this.statusText);
+
+    try {
+      log(JSON.parse(this.response || this.responseText));
+    } catch(e) {
+      //ignore
+    }
+  }
+});
+
+xhr.open("POST", "/api/channels");
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Cache-Control", "no-cache");
+
+xhr.send(data);
+```
+
+![image.png](/.attachments/image-be01c766-6e57-4d16-917f-e117189f3f97.png)
+
+```js
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === 4) {
+    var log = (this.status >= 200 && this.status < 300) ? console.log : console.error;
+
+    log(this.status + " " + this.statusText);
+
+    try {
+      log(JSON.parse(this.response || this.responseText));
+    } catch(e) {
+      //ignore
+    }
+  }
+});
+
+xhr.open("GET", "/api/channels");
+xhr.setRequestHeader("Cache-Control", "no-cache");
+
+xhr.send();
+```
+
+![image.png](/.attachments/image-cfeeac6e-64ff-4cac-b909-b64e59aaad9f.png)
+
+```js
+var data = JSON.stringify({
+  "channelId": 13,
+  "displayName": "my channel",
+  "description": "only cool people allowed",
+  "isPublic": true
+});
+
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === 4) {
+    var log = (this.status >= 200 && this.status < 300) ? console.log : console.error;
+
+    log(this.status + " " + this.statusText);
+
+    try {
+      log(JSON.parse(this.response || this.responseText));
+    } catch(e) {
+      //ignore
+    }
+  }
+});
+
+xhr.open("PATCH", "/api/channels");
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Cache-Control", "no-cache");
+
+xhr.send(data);
+```
+
+![image.png](/.attachments/image-42ac64aa-ee83-4cc7-a5a3-7bd403bfd983.png)
+
+![image.png](/.attachments/image-69d3db4b-2e56-40e7-9764-0ef0def2c01b.png)
 
 ## Download Source
