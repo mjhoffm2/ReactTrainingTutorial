@@ -22,6 +22,8 @@ In addition to helping developers keep track of what scripts have already been r
 
 ### Implementation
 
+![image.png](/.attachments/image-5773bcfb-fcc4-4a32-99b0-78d3b6e51143.png)
+
 _Startup.cs_
 ```cs
 using System;
@@ -86,4 +88,22 @@ namespace MyProject
 
 ### Best practices
 
+#### Updating migration scripts
+
 It is important to keep in mind that once a script has run, it will not be re-run on the same database even if it changes.  As a result, if a mistake is made in a migration script, it should be addressed by creating a new migration script that fixes the problem, deleting the old script if necessary.  If the script is simply modified without changing the name, it will not be re-run on any database that already had the script applied.
+
+#### Ttansitioning from manual to DbUp
+
+_Migrations\/Script0000 - prevent incorrect execution.sql_
+```sql
+if OBJECT_ID(N'MyTable') IS NOT NULL
+BEGIN
+	throw 51000, 'Baseline migrations are only valid in a fresh database, but it was detected that other migrations have already run.  You must either (1) reset the database or (2) manually insert script names into the SchemaVersions table to skip them.', 1
+END
+```
+
+#### Stored procedures and functions
+
+Stored procedures cannot be incrementally updated.  They need to be completely replaced with an `ALTER PROCEDURE` command.  As a result, migration scripts to update a stored procedure are essentially going to be mass copy-paste versions of the previous migration script with some changes.  This can make it inconvenient to compare the stored procedure to the last version to see exactly what changed, and creates a lot of redundancy.
+
+To address this issue, the strategy that I use is to simply update the previous migration script for that stored procedure with the changes that I want, and then also update the name of that script.  This will cause the script to be run again, and makes it easy to see the diff in git.  Additionally, there will only be one copy of the stored procedure in the migration scripts at a time, instead of a bunch of old and redundant versions.  The only caveat is that it is necessary to start the script with `CREATE OR ALTER PROCEDURE` to accommodate both updating the procedure, as well as creating it in a fresh database.
