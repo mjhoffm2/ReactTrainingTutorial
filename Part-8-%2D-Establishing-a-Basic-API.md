@@ -2,7 +2,7 @@
 
 ## Overview
 
-This part of the tutorial is continued from [Part 7 - Database Integration and Entity Framework Core](/Part-7-%2D-Database-Integration-and-Entity-Framework-Core).
+This part of the tutorial is continued from [Part 7 - Database Integration and Entity Framework Core](/Part-7-%252D-Database-Integration-and-Entity-Framework-Core).
 
 In the previous part of the tutorial, we already set up an API controller with two basic endpoints.  In this part of the tutorial, we are going to extend that API by making our channel manager service and controller more interesting.  We are also going to set up a system for setting response codes for when things go wrong.
 
