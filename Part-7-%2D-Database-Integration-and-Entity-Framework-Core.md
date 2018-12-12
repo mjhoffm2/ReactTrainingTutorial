@@ -4,7 +4,7 @@
 
 This part of the tutorial is continued from [Part 6 - Setting up UI with .NET Core instead of Node](/Part-6-%252D-Setting-up-UI-with-.NET-Core-instead-of-Node.md).  However, it is not necessary to have followed the tutorial up to this point.  The only prerequisite for this part of the tutorial will be to have some sort of .NET Core application already set up.
 
-In this part of the tutorial will be going over setting up a sql database for our Slack Training App, using that to create an Entity Framework Database Context.  We will also be going over the configuration for how to connect to our database, as well as creating some example service calls using Entity Framework Core.  The process for starting with a sql database, and creating a C# database context from it is referred to as the "database first" approach.  The alternative is referred to as "code first", which is a valid approach but I will not be going over it in this tutorial.
+In this part of the tutorial will be going over setting up a sql database for our Slack Training App, and using that to create an Entity Framework Database Context.  We will also be going over the configuration for how to connect to our database, as well as creating some example service calls using Entity Framework Core.  The process for starting with a sql database, and creating a C# database context from it is referred to as the "database first" approach.  The alternative is referred to as "code first", which is a valid approach but I will not be going over it in this tutorial.
 
 ## Set up SQL Database
 
@@ -149,9 +149,13 @@ Our basic CRUD api will need a service and a controller, as well as a tiny bit o
 
 ### Service Implementation
 
-Using the database context is super simple, and this simplicity is the whole reason we went through all the previous effort.  If we want to get the list of channels from the database, we can use `context.Channel`.  This will give us a `DbSet<Channel>`, which extends `IEnumerable<Channel>`.  For performance reasons (and avoid issues with the database getting disposed), we will convert this DbSet to a List asynchronously using `await context.Channel.ToListAsync()` before returning.
+Using the database context is super simple, and this simplicity is the whole reason we went through all the previous effort.  To provide our channel manager service with the SlackTrainingDb service we made, we simply add it as a parameter to the constructor and let dependency injection handle the rest.
+
+If we want to get the list of channels from the database, we can use `context.Channel`.  This will give us a `DbSet<Channel>`, which extends `IEnumerable<Channel>`.  For performance reasons (and avoid issues with the database getting disposed), we will convert this DbSet to a List asynchronously using `await context.Channel.ToListAsync()` before returning.  It is important to keep in mind that the data doesn't actually get read from the database until the results are actually read and enumerated, which in this case is done by converting it to a list.
 
 When we want to add a channel to the database, we do it in two steps.  First, we add the information about the channel we want to create to the database context.  This will allow EF Core to start tracking the entity.  Next, we call `await context.SaveChangesAsync();` to write it to the database.
+
+Below is an example implementation for the channel manager service using the SlackTrainingDb service we put together.
 
 _Services\/ChannelManagerService.cs_
 ```cs
@@ -197,7 +201,7 @@ namespace React_Demo.Services
 }
 ```
 
-Don't forget to also register the new service for dependency injection by adding it to the `ConfigureServices` method in the `Startup` class.
+Don't forget to also register the new service for dependency injection by adding it to the `ConfigureServices` method in the `Startup` class.  Otherwise, you won't be able to use this service via dependency injection in other classes.
 
 _Startup.cs_
 ```cs
@@ -212,6 +216,8 @@ _Startup.cs_
 ```
 
 ### Controller Implementation
+
+In order for our service methods to be accessible through our api, we will need to make some endpoints for it.  To create some endpoints, we will create a `ChannelManagerController` class which extends the `Controller` class.  Classes that extend `Controller` are treated specially by the ASP.NET Core runtime.  In our controller class, we can make the channel manager service available using dependency injection, just like how we made the database context available to the channel manager service.
 
 _Controllers\/ChannelManagerController.cs_
 ```cs
@@ -249,9 +255,13 @@ namespace React_Demo.Controllers
 }
 ```
 
+In the above example controller class below, we create two endpoints.  The first endpoint, `GET /api/channels`, doesn't take any arguments and returns the list of channels from the channel manager service we made.  The second endpoint, `POST /api/channels`, requires a JSON body which matches the fields on a Channel.  Only the `displayName` field is required.  We use annotations such as `[FromBody]` and `[HttpGet]` to configure how our controller methods are accessed and how requests should be interpreted.
+
 Controllers do not need to by registered in the `ConfigureServices` method in the `Startup` class, so we are done.
 
 ## Test it out
+
+At this point, we can go ahead and run our server to test our our api endpoints.  You can test out these endpoints using a tool like postman, or you can just run some javascript in the browser window that appears when you run the debugger.  The below snippet of javascript code will create a channel called "the cool kids club".
 
 ```js
 var data = JSON.stringify({
@@ -263,18 +273,23 @@ xhr.withCredentials = true;
 
 xhr.addEventListener("readystatechange", function () {
   if (this.readyState === 4) {
-    console.log(this.responseText);
+    if (this.status >= 200 && this.status < 300) {
+      console.log(this.status + " " + this.statusText);
+    } else {
+      console.error(this.status + " " + this.statusText);
+    }
   }
 });
 
-xhr.open("POST", "http://localhost:53609/api/channels");
+xhr.open("POST", "/api/channels");
 xhr.setRequestHeader("Content-Type", "application/json");
 xhr.setRequestHeader("Cache-Control", "no-cache");
-xhr.setRequestHeader("Postman-Token", "f02bbbb5-c390-44b0-9d9a-2dae31a0a926");
 
 xhr.send(data);
 ```
-Should produce a 200 OK response.
+Running this in your browser should produce a `200 OK` response.
+
+After the channel has been created, you can test out the endpoint for getting the list of channels to see it
 
 GET http://localhost:53609/api/channels
 ```json
@@ -301,3 +316,11 @@ GET http://localhost:53609/api/channels
 ### Generated code contains errors due to project name
 
 One issue I ran into with the scaffolding tool is the fact that the name of my project was originally 'React Demo', but an indentifier cannot have a space in it so my namespace is actually 'React_Demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I simply fixed the names after using the scaffolding tool.  Later, I renamed the project to be 'React_Demo' with an underscore instead of a space.  This was done by renaming and updating the solution (.sln) file, then renaming the .csproj file.
+
+## Download Source
+
+The source code up to this point can be found here:
+
+https://github.com/mjhoffm2/react-demo/tree/Part-7
+
+The code for this part of the tutorial can be found in the `.net core 2.1` folder.
