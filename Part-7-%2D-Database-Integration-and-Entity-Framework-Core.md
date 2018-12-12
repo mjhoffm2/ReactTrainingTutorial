@@ -317,6 +317,10 @@ GET http://localhost:53609/api/channels
 
 One issue I ran into with the scaffolding tool is the fact that the name of my project was originally 'React Demo', but an indentifier cannot have a space in it so my namespace is actually 'React_Demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I simply fixed the names after using the scaffolding tool.  Later, I renamed the project to be 'React_Demo' with an underscore instead of a space.  This was done by renaming and updating the solution (.sln) file, then renaming the .csproj file.
 
+### When I try to create a channel, I get a 415 response code
+
+A 415 response code indicates that your request body could not be bound to the `channel` parameter in the controller endpoint.  This is likely due to one of two reasons.  Either your json body is missing or malformed, or you forgot to include the `Content-Type: application/json` header.
+
 ## Download Source
 
 The source code up to this point can be found here:
