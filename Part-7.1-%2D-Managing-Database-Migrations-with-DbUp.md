@@ -2,7 +2,7 @@
 
 ## Overview
 
-This page is not part of the main series, but if you have followed along so far, this may be a useful interlude.
+This page is not part of the main series on creating a basic slack clone, but if you have followed along so far, this may be a useful interlude after [Part 7 - Database Integration and Entity Framework Core](/Part-7-%252D-Database-Integration-and-Entity-Framework-Core).
 
 In this tutorial, I will be going over an approach I use for managing database migrations in a project with many developers where the schema is constantly changing.  In the past, this has easily gotten out of hand.  In one project, we had developers creating scripts that other developers needed to manually run against their development databases to update them.  It was difficult to version control these migrations and keep track of which scripts needed to be run on different branches of the code.  It was also difficult to create and keep track of these scripts.  Frequently, it was necessary to just delete the developer's database and run the all the scripts from scratch.  Sometimes a developer would just create a giant script that just deleted everything and re-created all tables and other objects.
 
@@ -23,6 +23,8 @@ In addition to helping developers keep track of what scripts have already been r
 ### Implementation
 
 ![image.png](/.attachments/image-5773bcfb-fcc4-4a32-99b0-78d3b6e51143.png)
+
+![image.png](/.attachments/image-fc46bd60-ffd4-444f-b7bb-f64b14645158.png)
 
 _Startup.cs_
 ```cs
