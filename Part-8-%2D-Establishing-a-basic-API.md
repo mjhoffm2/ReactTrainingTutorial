@@ -211,30 +211,30 @@ public async Task<Channel> GetChannel(long channelId)
 
 _Services\/ChannelManagerService.cs_
 ```cs
-		public async Task<Channel> AddChannel(Channel channel)
-		{
-			string displayName = channel.DisplayName;
-			string description = channel.Description;
-			bool isPublic = channel.IsPublic;
+public async Task<Channel> AddChannel(Channel channel)
+{
+	string displayName = channel.DisplayName;
+	string description = channel.Description;
+	bool isPublic = channel.IsPublic;
 
-			if (String.IsNullOrWhiteSpace(displayName))
-			{
-				throw new BadRequestException("Channel display name cannot be empty");
-			}
+	if (String.IsNullOrWhiteSpace(displayName))
+	{
+		throw new BadRequestException("Channel display name cannot be empty");
+	}
 
-			Channel channelToCreate = new Channel()
-			{
-				DisplayName = displayName,
-				Description = description,
-				IsPublic = isPublic
-			};
+	Channel channelToCreate = new Channel()
+	{
+		DisplayName = displayName,
+		Description = description,
+		IsPublic = isPublic
+	};
 
-			context.Channel.Add(channelToCreate);
+	context.Channel.Add(channelToCreate);
 
-			await context.SaveChangesAsync();
+	await context.SaveChangesAsync();
 
-			return channelToCreate;
-		}
+	return channelToCreate;
+}
 ```
 
 ### Updating a Channel
