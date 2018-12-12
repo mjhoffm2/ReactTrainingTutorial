@@ -255,13 +255,19 @@ namespace React_Demo.Controllers
 }
 ```
 
-In the above example controller class below, we create two endpoints.  The first endpoint, `GET /api/channels`, doesn't take any arguments and returns the list of channels from the channel manager service we made.  The second endpoint, `POST /api/channels`, requires a JSON body which matches the fields on a Channel.  Only the `displayName` field is required.  We use annotations such as `[FromBody]` and `[HttpGet]` to configure how our controller methods are accessed and how requests should be interpreted.
+In the above example controller class, we create two endpoints.  The first endpoint, `GET /api/channels`, doesn't take any arguments and returns the list of channels from the channel manager service we made.  The second endpoint, `POST /api/channels`, requires a JSON body which matches the fields on a Channel.  Only the `displayName` field is required.  We use annotations such as `[FromBody]` and `[HttpGet]` to configure how our controller methods are accessed and how requests should be interpreted.
 
 Controllers do not need to by registered in the `ConfigureServices` method in the `Startup` class, so we are done.
 
+### File structure
+
+For reference, here is how I am organizing my code for this part of the tutorial:
+
+![image.png](/.attachments/image-1a29b4d8-b2e1-45d0-9783-35ed5e124aae.png)
+
 ## Test it out
 
-At this point, we can go ahead and run our server to test our our api endpoints.  You can test out these endpoints using a tool like postman, or you can just run some javascript in the browser window that appears when you run the debugger.  The below snippet of javascript code will create a channel called "the cool kids club".
+At this point, we can go ahead and run our server to test our our api endpoints.  You can test out these endpoints using a tool like postman, or you can just run some JavaScript in the browser window that appears when you run the debugger.  The below snippet of JavaScript code will create a channel called "the cool kids club".
 
 ```js
 var data = JSON.stringify({
@@ -315,7 +321,7 @@ GET http://localhost:53609/api/channels
 
 ### Generated code contains errors due to project name
 
-One issue I ran into with the scaffolding tool is the fact that the name of my project was originally 'React Demo', but an indentifier cannot have a space in it so my namespace is actually 'React_Demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I simply fixed the names after using the scaffolding tool.  Later, I renamed the project to be 'React_Demo' with an underscore instead of a space.  This was done by renaming and updating the solution (.sln) file, then renaming the .csproj file.
+One issue I ran into with the scaffolding tool is the fact that the name of my project was originally 'React Demo', but an identifier cannot have a space in it so my namespace is actually 'React_Demo'.  The scaffolding tool, unfortunately, didn't pick up on this and generated files with `namespace React Demo.Models.Database` in every file, which is a compilation error.  Unfortunately, the only workarounds that I could come up with were to either not have placed a space in my project name to begin with, or to edit all my generated models after I use the scaffolding tool.  Hopefully, this will be addressed soon.  Alternately, I could set up a separate project in my solution for my generated database models and context.  In this tutorial, I simply fixed the names after using the scaffolding tool.  Later, I renamed the project to be 'React_Demo' with an underscore instead of a space.  This was done by renaming and updating the solution (.sln) file, then renaming the .csproj file.
 
 ### When I try to create a channel, I get a 415 response code
 
