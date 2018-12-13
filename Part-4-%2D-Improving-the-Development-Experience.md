@@ -348,10 +348,10 @@ _boot-client.tsx_
 import * as React from 'react';
 import * as ReactDOM from 'react-dom'
 import createBrowserHistory from "history/createBrowserHistory";
-import {rootReducer} from "./reducers/reducer";
+import {createRootReducer} from "./reducers/reducer";
 import {applyMiddleware, compose, createStore} from "redux";
 import {Provider} from 'react-redux';
-import {ConnectedRouter, connectRouter, routerMiddleware} from "connected-react-router";
+import {ConnectedRouter, routerMiddleware} from "connected-react-router";
 import {Routes} from "./routes";
 
 //polyfills for IE
@@ -368,7 +368,7 @@ const history = createBrowserHistory();
 
 //configure store based on https://github.com/supasate/connected-react-router
 const store = createStore(
-    connectRouter(history)(rootReducer),
+    createRootReducer(history),
     compose(
         applyMiddleware(
             routerMiddleware(history)
