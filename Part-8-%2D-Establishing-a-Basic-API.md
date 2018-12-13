@@ -300,19 +300,22 @@ public async Task<Channel> UpdateChannel(Channel channel)
 
 ### Deleting a Channel
 
+When deleting a channel, we only need the primary key.  None of the other information is of any use, so we can just take a `long channelId` instead of an entire `Channel channel` parameter.  There is also nothing to return (it was deleted).  To actually perform the delete, we need to obtain the channel from the database to make sure it is valid.  Then, we can call `context.Channel.Remove(oldChannel);`, which will mark it as deleted.  Finally, we call `await context.SaveChangesAsync();`, which will actually delete the corresponding row from the database.
+
 _Services\/ChannelManagerService.cs_
 ```cs
-public async Task DeleteChannel(Channel channel)
+public async Task DeleteChannel(long channelId)
 {
-	long channelId = channel.ChannelId;
-
-	//the channel provided as an argument is simply a deserialized object from the user
-	//we need to obtain the tracked entity from EF Core
 	Channel oldChannel = await context.Channel.FindAsync(channelId);
 
 	if (oldChannel == null)
 	{
 		throw new NotFoundException("No channel exists with the id: " + channelId);
+	}
+
+	if (oldChannel.IsGeneral)
+	{
+		throw new UnauthorizedException("You do not have permission to delete this channel");
 	}
 
 	context.Channel.Remove(oldChannel);
@@ -321,7 +324,22 @@ public async Task DeleteChannel(Channel channel)
 }
 ```
 
+We can also make use of the new `UnauthorizedException` to prevent someone from accidentally deleting the general channel.  Don't confuse it with the `UnauthorizedAccessException`, which is different.
+
 ## Updating the Channel Manager Controller
+
+We will create a total of 5 endpoints in our api:
+1. Search for public channels, `GET /api/channels`
+2. Get a specific channel, `GET /api/channels/:channelId`
+3. Add a channel, `POST /api/channels`
+4. Update a channel, `PATCH /api/channels`
+5. Delete a channel, `DELETE /api/channels/:channelId`
+
+You could make the case that the PATCH request to update a channel should also have a `:channelId` in the url path.  However, that would be redundant with the primary key that should already be present in the request body, so I chose to omit it in this example.  Similarly, the DELETE request could accept a request body containing the channel to be deleted rather putting the primary key in the url path, to make it more consistent with other requests.  However, having request bodies in DELETE requests is generally frowned upon.
+
+We already have a service method for each one of our api endpoints, so all we need to do is handle the interface between the http request and the service methods.  Most of these are pretty trivial.  Parameters from the url path are immediately available as parameters.  Parameters annotated with `[FromQuery]` indicate that the parameter will be pulled from the query string in the url.  Parameters annotated with `[FromBody]` indicate that they will be deserialized from the request body.  If the request has the correct `application/json` header, then this is automatic.  For our GET and POST endpoints, we will return a JSON response.  For the PATCH and DELETE endpoints, we will just return an empty `200 OK` response.
+
+Below is the final code for the controller.
 
 _Controllers\/ChannelManagerController.cs_
 ```cs
@@ -349,8 +367,8 @@ namespace React_Demo.Controllers
 			return Json(channels);
 		}
 
-		[HttpGet("byId")]
-		public async Task<IActionResult> GetChannel([FromQuery] long channelId)
+		[HttpGet("{channelId:long}")]
+		public async Task<IActionResult> GetChannel(long channelId)
 		{
 			var channel = await channelService.GetChannel(channelId);
 			return Json(channel);
@@ -370,10 +388,10 @@ namespace React_Demo.Controllers
 			return Ok();
 		}
 
-		[HttpDelete]
-		public async Task<IActionResult> DeleteChannel([FromBody] Channel channel)
+		[HttpDelete("{channelId:long}")]
+		public async Task<IActionResult> DeleteChannel(long channelId)
 		{
-			await channelService.DeleteChannel(channel);
+			await channelService.DeleteChannel(channelId);
 			return Ok();
 		}
 	}
@@ -382,7 +400,12 @@ namespace React_Demo.Controllers
 
 ## Try it out
 
+To run any of these demos, run the application using the debugger, and wait for it to start.  You should see a web browser launch as part of the debugger. 
+ Simply copy and paste the JavaScript snippet into the developer tools in the web browser that appears.  The JavaScript snippet will make a request to the server with the provided json payload (if applicable), and will print out the response, if any.
+
 ### Empty name
+
+First, let's test out our error middleware by trying to create a channel with a blank name.
 
 ```js
 var data = JSON.stringify({
@@ -413,7 +436,13 @@ xhr.setRequestHeader("Cache-Control", "no-cache");
 xhr.send(data);
 ```
 
+If all goes as intended, you should see the following response:
+
 ![image.png](/.attachments/image-8e4b0efb-b860-4d9e-9acb-7fb1226f7302.png)
+
+This is good, we have a proper 400 Bad Request response instead of a 500 Internal Server Error.  Additionally, we have a JSON response body that we can work with if we want to.
+
+Next, add a channel for real.  I'll call it 'my channel' and give it a description
 
 ```js
 var data = JSON.stringify({
@@ -447,6 +476,10 @@ xhr.send(data);
 
 ![image.png](/.attachments/image-be01c766-6e57-4d16-917f-e117189f3f97.png)
 
+When I ran it, I got a generated channelId of 13.  You will probably get something different.
+
+Next let's test out the endpoint for searching for channels.
+
 ```js
 var xhr = new XMLHttpRequest();
 xhr.withCredentials = true;
@@ -472,6 +505,8 @@ xhr.send();
 ```
 
 ![image.png](/.attachments/image-cfeeac6e-64ff-4cac-b909-b64e59aaad9f.png)
+
+We got a 200 OK response, but no channels came back.  This is because our channel has `isPublic` set to `false`.  Let's modify our channel so that it shows up when we search for it.  We can make use of our PATCH endpoint for this.  You will need to update this snippet to have the correct channelId in the JSON data.
 
 ```js
 var data = JSON.stringify({
@@ -504,6 +539,8 @@ xhr.send(data);
 ```
 
 ![image.png](/.attachments/image-079e3dbc-d9a6-4c35-b882-1bf5bc2f8864.png)
+
+Still foiled!  In our request, we neglected to include the `displayName` and `description` fields, because we only wanted to update the `isPublic` field.  However, our API will try replace those fields regardless.  If we were to set up our API so that it ignored null values, that would prevent us from being able to explicitly set fields to null, which we likely want to do sometimes.  When we deserialize an object in C#, there is no distinction between null and undefined, so trying to propagate information about excluded fields (as opposed to intentionally null fields) is complicated.  For now, let's just include them.
 
 ```js
 var data = JSON.stringify({
@@ -539,6 +576,8 @@ xhr.send(data);
 
 ![image.png](/.attachments/image-42ac64aa-ee83-4cc7-a5a3-7bd403bfd983.png)
 
+Now that worked.  We can re-run our previous request to search for all channels and finally see it come back.
+
 ![image.png](/.attachments/image-69d3db4b-2e56-40e7-9764-0ef0def2c01b.png)
 
 ## Download Source
@@ -547,4 +586,4 @@ The source code up to this point can be found here:
 
 https://github.com/mjhoffm2/react-demo/tree/Part-8
 
-The code for this part of the tutorial can be found in the `.net core 2.1` folder.
+The code for this part of the tutorial can be found in the `.net core 2.1` folder, on the `Part-8` branch.
