@@ -334,3 +334,7 @@ The source code up to this point can be found here:
 https://github.com/mjhoffm2/react-demo/tree/Part-7
 
 The code for this part of the tutorial can be found in the `.net core 2.1` folder.
+
+Up next: [Part 8 - Establishing a Basic API](/Part-8-%252D-Establishing-a-Basic-API)
+
+See also: [Part 7.1 - Managing Database Migrations with DbUp](/Part-7.1-%252D-Managing-Database-Migrations-with-DbUp)
