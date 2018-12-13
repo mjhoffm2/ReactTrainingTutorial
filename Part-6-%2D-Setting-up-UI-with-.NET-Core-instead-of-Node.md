@@ -643,3 +643,5 @@ The source code up to this point can be found here:
 https://github.com/mjhoffm2/react-demo/tree/Part-6
 
 The code for this part of the tutorial can be found in the `.net core 2.1` folder.
+
+Up Next: [Part 7 - Database Integration and Entity Framework Core](/Part-7-%252D-Database-Integration-and-Entity-Framework-Core)
