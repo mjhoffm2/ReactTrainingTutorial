@@ -171,10 +171,10 @@ _package.json_
   "dependencies": {
     "@types/es6-promise": "^3.3.0",
     "@types/express": "^4.16.0",
-    "@types/react": "^16.4.13",
+    "@types/react": "^16.7.17",
     "@types/react-bootstrap": "^0.32.13",
     "@types/react-dom": "^16.0.7",
-    "@types/react-redux": "^6.0.9",
+    "@types/react-redux": "^6.0.11",
     "@types/react-router": "^4.0.30",
     "@types/react-router-dom": "^4.3.1",
     "@types/webpack": "^4.4.14",
@@ -183,21 +183,21 @@ _package.json_
     "@types/webpack-hot-middleware": "^2.16.4",
     "awesome-typescript-loader": "^5.2.1",
     "bootstrap": "^3.3.7",
-    "connected-react-router": "^4.5.0",
+    "connected-react-router": "^5.0.1",
     "css-loader": "^1.0.0",
     "es6-promise": "^4.2.5",
     "express": "^4.16.3",
     "file-loader": "^2.0.0",
-    "react": "^16.5.0",
+    "react": "^16.6.3",
     "react-bootstrap": "^0.32.4",
     "react-dom": "^16.5.0",
-    "react-hot-loader": "^4.3.11",
-    "react-redux": "^5.0.7",
+    "react-hot-loader": "^4.6.0",
+    "react-redux": "^5.1.1",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.0",
     "style-loader": "^0.23.0",
-    "typescript": "^3.0.3",
+    "typescript": "^3.2.2",
     "url-loader": "^1.1.1",
     "webpack-dev-middleware": "^3.4.0",
     "webpack-hot-middleware": "^2.24.3",
@@ -517,19 +517,19 @@ Additionally, while react-hot-reloader works in 99% of cases, it is possible to 
 
 ### Setup
 
-Setting this up is very simple. All we should need to do is go to `boot-client.tsx` and wrap the part we want to hot reload in an `<AppContainer />` element from react-hot-loader, and update some configuration.  However, after messing with this for a while I could not get this to preserve any component state.  Anyway, as of `react-hot-loader` v4, it is recommended to use the new `hot(module)( ... )` api instead of the `<AppContainer />` component, which requires much less configuration.
+Setting this up is very simple. All we should need to do is go to `boot-client.tsx` and wrap the part we want to hot reload in an `<AppContainer />` element from react-hot-loader, and update some configuration.  However, after messing with this for a while I could not get this to preserve any component state.  Anyway, as of `react-hot-loader` v4.6, it is recommended to use the new `hot( ... )` api instead of the `<AppContainer />` component, which requires much less configuration.
 
-First, we go to the root component that we want to hot-reload, in this case the `Routes` component in `routes.tsx`, and we wrap the export in a `hot(module)( ... );` call.
+First, we go to the root component that we want to hot-reload, in this case the `Routes` component in `routes.tsx`, and we wrap the export in a `hot( ... );` call.
 
 _routes.tsx_
 ```ts
 import * as React from 'react';
 import {Route, Switch, Redirect} from 'react-router';
-import {hot} from 'react-hot-loader'
+import {hot} from 'react-hot-loader/root'
 import {ChannelList} from "./components/Channels";
 import {Home} from "./components/Home";
 
-export const Routes = hot(module)(() =>
+export const Routes = hot(() =>
     <Switch>
         <Route exact path={'/'} component={Home} />
         <Route path={'/channels'} component={ChannelList} />
@@ -557,7 +557,6 @@ import 'es6-promise/auto';
 
 //styles
 import 'bootstrap/dist/css/bootstrap.css'
-import {AppContainer} from "react-hot-loader";
 
 const message: string = "this is the client";
 console.log(message);
@@ -584,9 +583,7 @@ ReactDOM.render(
     document.getElementById('root')
 );
 ```
-As you may be able to tell, the `hot(module)( ... );` approach is more streamlined and handles a lot of the hard stuff for us.  However, it also takes a more opinionated approach at the build process and how we are doing hot module reloading.  We are now dependent on `babel-loader`, which `awesome-typescript-loader` uses internally.  If we want to hot reload something outside of our react components, we will need to configure that separately.
-
-We also lose flexibility with how react components are hot reloaded.  In particular, it is helpful to be able to configure the hot reloader to skip an update with compilation errors.  This is done by default with the way we had configured hot module reloading previously.  The default behavior for react-hot-loader's `hot(module)( ... )` api is to accept errored modules anyway, which will then cause the module to become 'unaccepted' and no longer hot reload until the page is refreshed.  I could not figure out a way to address this.  In theory you should be able to exert more control using the `<AppContainer />` component, but I was not able to get that to correctly preserve the state of the React components.
+As you may be able to tell, the `hot( ... );` approach is more streamlined and handles a lot of the hard stuff for us.  However, it also takes a more opinionated approach at the build process and how we are doing hot module reloading.  We are now dependent on `babel-loader`, which `awesome-typescript-loader` uses internally.  If we want to hot reload something outside of our react components, we will need to configure that separately.  We also lose flexibility with how react components are hot reloaded.
 
 Whichever way we do it, we still need to have the hot module replacement plugin in webpack, as well as the `webpack-hot-middleware/client` entry point.
 
